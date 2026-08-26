@@ -27,11 +27,11 @@
 
 **Files:**
 - Modify: `package.json`
-- Create: `vitest.config.ts`
+- Create: `vitest.config.mts`
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: `npm test` command (runs `vitest run`); `vitest.config.ts` resolves the `@/*` path alias so later tasks' tests can `import` with the same alias used in app code.
+- Produces: `npm test` command (runs `vitest run`); `vitest.config.mts` resolves the `@/*` path alias so later tasks' tests can `import` with the same alias used in app code. (`.mts`, not `.ts` — the package isn't `"type": "module"`, and Vitest's native config loader warns on CommonJS-loaded ESM syntax otherwise.)
 
 - [ ] **Step 1: Install runtime and dev dependencies**
 
@@ -48,7 +48,7 @@ In `package.json`, add to `"scripts"`:
 "test": "vitest run"
 ```
 
-- [ ] **Step 3: Create `vitest.config.ts`**
+- [ ] **Step 3: Create `vitest.config.mts`**
 
 ```ts
 import path from 'path';
@@ -60,7 +60,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '.'),
+      '@': path.resolve(import.meta.dirname, '.'),
     },
   },
 });
@@ -74,7 +74,7 @@ Expected: exits 0, reports no test files found.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add package.json package-lock.json vitest.config.ts
+git add package.json package-lock.json vitest.config.mts
 git commit -m "chore: add supabase/zod deps and configure vitest"
 ```
 
@@ -756,7 +756,7 @@ export const signupSchema = z.object({
   email: z.string().email('メールアドレスの形式が正しくありません'),
   password: z.string().min(8, 'パスワードは8文字以上で入力してください'),
   role: z.enum(['student', 'mentor'], {
-    errorMap: () => ({ message: '種別を選択してください' }),
+    message: '種別を選択してください',
   }),
 });
 
@@ -943,7 +943,7 @@ import { CATEGORY_KEYS } from '@/lib/constants/categories';
 export const matchRequestSchema = z.object({
   mentorId: z.string().uuid('メンターIDが不正です'),
   categoryKey: z.enum(CATEGORY_KEYS, {
-    errorMap: () => ({ message: 'カテゴリを選択してください' }),
+    message: 'カテゴリを選択してください',
   }),
   message: z.string().max(1000, 'メッセージは1000文字以内で入力してください').optional(),
 });
