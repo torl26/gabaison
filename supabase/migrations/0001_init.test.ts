@@ -34,4 +34,18 @@ describe('0001_init.sql', () => {
   it('restricts message inserts to accepted match_requests', () => {
     expect(sql).toContain("mr.status = 'accepted'");
   });
+
+  it('blocks self-service role changes on profiles', () => {
+    expect(sql).toContain('role cannot be changed after signup');
+    expect(sql).toContain(
+      "with check (auth.uid() = id and role in ('student', 'mentor'))"
+    );
+  });
+
+  it('restricts match_request status changes to the mentor and locks foreign keys', () => {
+    expect(sql).toContain('only the mentor can change the request status');
+    expect(sql).toContain(
+      'student_id, mentor_id, and category_id cannot be changed'
+    );
+  });
 });

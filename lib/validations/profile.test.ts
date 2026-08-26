@@ -32,4 +32,22 @@ describe('profileSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('accepts an https avatarUrl', () => {
+    const result = profileSchema.safeParse({
+      name: '山田太郎',
+      bio: '',
+      avatarUrl: 'https://example.com/avatar.png',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a javascript: avatarUrl', () => {
+    const result = profileSchema.safeParse({
+      name: '山田太郎',
+      bio: '',
+      avatarUrl: 'javascript:alert(1)',
+    });
+    expect(result.success).toBe(false);
+  });
 });

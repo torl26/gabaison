@@ -62,10 +62,31 @@ create policy "profiles_select_authenticated" on public.profiles
   for select to authenticated using (true);
 
 create policy "profiles_insert_own" on public.profiles
-  for insert to authenticated with check (auth.uid() = id);
+  for insert to authenticated with check (auth.uid() = id and role in ('student', 'mentor'));
 
 create policy "profiles_update_own" on public.profiles
   for update to authenticated using (auth.uid() = id);
+
+-- role must never change after signup (blocks self-escalation to 'admin',
+-- or a student flipping themselves to 'mentor', via a direct client update)
+create or replace function public.prevent_profile_role_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.role is distinct from old.role then
+    raise exception 'role cannot be changed after signup';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger profiles_prevent_role_change
+  before update on public.profiles
+  for each row
+  execute function public.prevent_profile_role_change();
 
 -- categories policies (read-only master data)
 create policy "categories_select_authenticated" on public.categories
@@ -90,6 +111,35 @@ create policy "match_requests_insert_student" on public.match_requests
 
 create policy "match_requests_update_participant" on public.match_requests
   for update to authenticated using (auth.uid() = student_id or auth.uid() = mentor_id);
+
+-- RLS above only gates *who may attempt* an update; without this trigger a
+-- student could self-approve (set status='accepted') or either party could
+-- reassign the request to a different student/mentor/category.
+create or replace function public.enforce_match_request_update()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.student_id is distinct from old.student_id
+     or new.mentor_id is distinct from old.mentor_id
+     or new.category_id is distinct from old.category_id then
+    raise exception 'student_id, mentor_id, and category_id cannot be changed';
+  end if;
+
+  if new.status is distinct from old.status and auth.uid() <> old.mentor_id then
+    raise exception 'only the mentor can change the request status';
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger match_requests_enforce_update
+  before update on public.match_requests
+  for each row
+  execute function public.enforce_match_request_update();
 
 -- messages policies
 create policy "messages_select_participant" on public.messages

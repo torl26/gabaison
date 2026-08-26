@@ -380,6 +380,20 @@ describe('0001_init.sql', () => {
   it('restricts message inserts to accepted match_requests', () => {
     expect(sql).toContain("mr.status = 'accepted'");
   });
+
+  it('blocks self-service role changes on profiles', () => {
+    expect(sql).toContain('role cannot be changed after signup');
+    expect(sql).toContain(
+      "with check (auth.uid() = id and role in ('student', 'mentor'))"
+    );
+  });
+
+  it('restricts match_request status changes to the mentor and locks foreign keys', () => {
+    expect(sql).toContain('only the mentor can change the request status');
+    expect(sql).toContain(
+      'student_id, mentor_id, and category_id cannot be changed'
+    );
+  });
 });
 ```
 
@@ -457,10 +471,31 @@ create policy "profiles_select_authenticated" on public.profiles
   for select to authenticated using (true);
 
 create policy "profiles_insert_own" on public.profiles
-  for insert to authenticated with check (auth.uid() = id);
+  for insert to authenticated with check (auth.uid() = id and role in ('student', 'mentor'));
 
 create policy "profiles_update_own" on public.profiles
   for update to authenticated using (auth.uid() = id);
+
+-- role must never change after signup (blocks self-escalation to 'admin',
+-- or a student flipping themselves to 'mentor', via a direct client update)
+create or replace function public.prevent_profile_role_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.role is distinct from old.role then
+    raise exception 'role cannot be changed after signup';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger profiles_prevent_role_change
+  before update on public.profiles
+  for each row
+  execute function public.prevent_profile_role_change();
 
 -- categories policies (read-only master data)
 create policy "categories_select_authenticated" on public.categories
@@ -836,6 +871,24 @@ describe('profileSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('accepts an https avatarUrl', () => {
+    const result = profileSchema.safeParse({
+      name: '山田太郎',
+      bio: '',
+      avatarUrl: 'https://example.com/avatar.png',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a javascript: avatarUrl', () => {
+    const result = profileSchema.safeParse({
+      name: '山田太郎',
+      bio: '',
+      avatarUrl: 'javascript:alert(1)',
+    });
+    expect(result.success).toBe(false);
+  });
 });
 ```
 
@@ -928,7 +981,9 @@ import { CATEGORY_KEYS } from '@/lib/constants/categories';
 export const profileSchema = z.object({
   name: z.string().min(1, '表示名を入力してください').max(50, '表示名は50文字以内で入力してください'),
   bio: z.string().max(1000, '自己紹介は1000文字以内で入力してください'),
-  avatarUrl: z.string().url('URLの形式が正しくありません').optional(),
+  avatarUrl: z
+    .url({ protocol: /^https?$/, message: 'URLの形式が正しくありません' })
+    .optional(),
   categoryKeys: z.array(z.enum(CATEGORY_KEYS)).optional(),
 });
 
