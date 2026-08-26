@@ -349,7 +349,7 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(__dirname, '0001_init.sql'),
+  path.join(import.meta.dirname, '0001_init.sql'),
   'utf-8'
 ).toLowerCase();
 
