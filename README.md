@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 学生-メンター マッチングアプリ
 
-## Getting Started
+設計書: [docs/superpowers/specs/2026-08-26-mentor-matching-design.md](docs/superpowers/specs/2026-08-26-mentor-matching-design.md)
 
-First, run the development server:
+## セットアップ
 
 ```bash
+npm install
+cp .env.local.example .env.local
+# .env.local に Supabase プロジェクトの URL / anon key を設定する
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Supabaseプロジェクトを作成したら、`supabase/migrations/0001_init.sql` を
+SupabaseのSQL Editor（または `supabase db push`）で適用してください。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## テスト
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm test          # Zodバリデーションスキーマの単体テスト（vitest）
+npx tsc --noEmit   # 型チェック
+npm run build      # ビルド確認
+```
 
-## Learn More
+## ディレクトリ構成
 
-To learn more about Next.js, take a look at the following resources:
+- `lib/supabase/` — Supabaseクライアント（`client.ts`=ブラウザ用, `server.ts`=Server Components/Actions用）
+- `lib/validations/` — Zodバリデーションスキーマ（Server Actionsの冒頭で使用）
+- `lib/actions/types.ts` — Server Actionsの共通戻り値型 `ActionResult`
+- `lib/constants/categories.ts` — 固定4カテゴリの定義
+- `types/database.ts` — DBテーブルに対応する型
+- `supabase/migrations/` — DBスキーマ・RLSポリシー
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 画面の分担
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+各画面はNext.js App Routerのroute groupで既に骨組み（空のpage.tsx）が
+用意されています。担当が決まったら、そのpage.tsxとそこから呼ぶ
+Server Actionsを実装してください。
 
-## Deploy on Vercel
+| 画面 | ルート | ファイル |
+|---|---|---|
+| ログイン | `/login` | `app/(auth)/login/page.tsx` |
+| 新規登録 | `/signup` | `app/(auth)/signup/page.tsx` |
+| プロフィール | `/profile` | `app/(dashboard)/profile/page.tsx` |
+| メンター検索 | `/mentors` | `app/(dashboard)/mentors/page.tsx` |
+| メンター詳細・申請 | `/mentors/[id]` | `app/(dashboard)/mentors/[id]/page.tsx` |
+| マッチング申請一覧・承認 | `/requests` | `app/(dashboard)/requests/page.tsx` |
+| チャット | `/chat/[matchId]` | `app/(dashboard)/chat/[matchId]/page.tsx` |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Server Actionsは各画面のファイル内（または同じディレクトリの `actions.ts`）に
+追加し、`lib/validations/` のスキーマで検証したうえで
+`lib/actions/types.ts` の `ok()` / `err()` を使って結果を返してください。

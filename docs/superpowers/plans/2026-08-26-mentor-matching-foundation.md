@@ -27,11 +27,11 @@
 
 **Files:**
 - Modify: `package.json`
-- Create: `vitest.config.ts`
+- Create: `vitest.config.mts`
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: `npm test` command (runs `vitest run`); `vitest.config.ts` resolves the `@/*` path alias so later tasks' tests can `import` with the same alias used in app code.
+- Produces: `npm test` command (runs `vitest run`); `vitest.config.mts` resolves the `@/*` path alias so later tasks' tests can `import` with the same alias used in app code. (`.mts`, not `.ts` — the package isn't `"type": "module"`, and Vitest's native config loader warns on CommonJS-loaded ESM syntax otherwise.)
 
 - [ ] **Step 1: Install runtime and dev dependencies**
 
@@ -48,7 +48,7 @@ In `package.json`, add to `"scripts"`:
 "test": "vitest run"
 ```
 
-- [ ] **Step 3: Create `vitest.config.ts`**
+- [ ] **Step 3: Create `vitest.config.mts`**
 
 ```ts
 import path from 'path';
@@ -60,7 +60,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '.'),
+      '@': path.resolve(import.meta.dirname, '.'),
     },
   },
 });
@@ -74,7 +74,7 @@ Expected: exits 0, reports no test files found.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add package.json package-lock.json vitest.config.ts
+git add package.json package-lock.json vitest.config.mts
 git commit -m "chore: add supabase/zod deps and configure vitest"
 ```
 
@@ -349,7 +349,7 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(__dirname, '0001_init.sql'),
+  path.join(import.meta.dirname, '0001_init.sql'),
   'utf-8'
 ).toLowerCase();
 
@@ -379,6 +379,20 @@ describe('0001_init.sql', () => {
 
   it('restricts message inserts to accepted match_requests', () => {
     expect(sql).toContain("mr.status = 'accepted'");
+  });
+
+  it('blocks self-service role changes on profiles', () => {
+    expect(sql).toContain('role cannot be changed after signup');
+    expect(sql).toContain(
+      "with check (auth.uid() = id and role in ('student', 'mentor'))"
+    );
+  });
+
+  it('restricts match_request status changes to the mentor and locks foreign keys', () => {
+    expect(sql).toContain('only the mentor can change the request status');
+    expect(sql).toContain(
+      'student_id, mentor_id, and category_id cannot be changed'
+    );
   });
 });
 ```
@@ -457,10 +471,31 @@ create policy "profiles_select_authenticated" on public.profiles
   for select to authenticated using (true);
 
 create policy "profiles_insert_own" on public.profiles
-  for insert to authenticated with check (auth.uid() = id);
+  for insert to authenticated with check (auth.uid() = id and role in ('student', 'mentor'));
 
 create policy "profiles_update_own" on public.profiles
   for update to authenticated using (auth.uid() = id);
+
+-- role must never change after signup (blocks self-escalation to 'admin',
+-- or a student flipping themselves to 'mentor', via a direct client update)
+create or replace function public.prevent_profile_role_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.role is distinct from old.role then
+    raise exception 'role cannot be changed after signup';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger profiles_prevent_role_change
+  before update on public.profiles
+  for each row
+  execute function public.prevent_profile_role_change();
 
 -- categories policies (read-only master data)
 create policy "categories_select_authenticated" on public.categories
@@ -756,7 +791,7 @@ export const signupSchema = z.object({
   email: z.string().email('メールアドレスの形式が正しくありません'),
   password: z.string().min(8, 'パスワードは8文字以上で入力してください'),
   role: z.enum(['student', 'mentor'], {
-    errorMap: () => ({ message: '種別を選択してください' }),
+    message: '種別を選択してください',
   }),
 });
 
@@ -836,6 +871,24 @@ describe('profileSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('accepts an https avatarUrl', () => {
+    const result = profileSchema.safeParse({
+      name: '山田太郎',
+      bio: '',
+      avatarUrl: 'https://example.com/avatar.png',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a javascript: avatarUrl', () => {
+    const result = profileSchema.safeParse({
+      name: '山田太郎',
+      bio: '',
+      avatarUrl: 'javascript:alert(1)',
+    });
+    expect(result.success).toBe(false);
+  });
 });
 ```
 
@@ -844,7 +897,7 @@ describe('profileSchema', () => {
 import { describe, expect, it } from 'vitest';
 import { matchRequestSchema } from './match-request';
 
-const MENTOR_ID = '11111111-1111-1111-1111-111111111111';
+const MENTOR_ID = '11111111-1111-4111-8111-111111111111';
 
 describe('matchRequestSchema', () => {
   it('accepts a valid match request', () => {
@@ -887,7 +940,7 @@ describe('matchRequestSchema', () => {
 import { describe, expect, it } from 'vitest';
 import { messageSchema } from './message';
 
-const MATCH_ID = '22222222-2222-2222-2222-222222222222';
+const MATCH_ID = '22222222-2222-4222-8222-222222222222';
 
 describe('messageSchema', () => {
   it('accepts a valid message', () => {
@@ -928,7 +981,9 @@ import { CATEGORY_KEYS } from '@/lib/constants/categories';
 export const profileSchema = z.object({
   name: z.string().min(1, '表示名を入力してください').max(50, '表示名は50文字以内で入力してください'),
   bio: z.string().max(1000, '自己紹介は1000文字以内で入力してください'),
-  avatarUrl: z.string().url('URLの形式が正しくありません').optional(),
+  avatarUrl: z
+    .url({ protocol: /^https?$/, message: 'URLの形式が正しくありません' })
+    .optional(),
   categoryKeys: z.array(z.enum(CATEGORY_KEYS)).optional(),
 });
 
@@ -943,7 +998,7 @@ import { CATEGORY_KEYS } from '@/lib/constants/categories';
 export const matchRequestSchema = z.object({
   mentorId: z.string().uuid('メンターIDが不正です'),
   categoryKey: z.enum(CATEGORY_KEYS, {
-    errorMap: () => ({ message: 'カテゴリを選択してください' }),
+    message: 'カテゴリを選択してください',
   }),
   message: z.string().max(1000, 'メッセージは1000文字以内で入力してください').optional(),
 });
