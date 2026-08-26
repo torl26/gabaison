@@ -33,20 +33,28 @@ npm run build      # ビルド確認
 
 ## 画面の分担
 
-各画面はNext.js App Routerのroute groupで既に骨組み（空のpage.tsx）が
-用意されています。担当が決まったら、そのpage.tsxとそこから呼ぶ
+ログイン・新規登録・ログアウトは実装済みです（`app/(auth)/actions.ts`）。
+残り5画面はNext.js App Routerのroute groupで骨組み（空のpage.tsx）だけが
+用意されているので、担当が決まったらそのpage.tsxとそこから呼ぶ
 Server Actionsを実装してください。
 
-| 画面 | ルート | ファイル |
-|---|---|---|
-| ログイン | `/login` | `app/(auth)/login/page.tsx` |
-| 新規登録 | `/signup` | `app/(auth)/signup/page.tsx` |
-| プロフィール | `/profile` | `app/(dashboard)/profile/page.tsx` |
-| メンター検索 | `/mentors` | `app/(dashboard)/mentors/page.tsx` |
-| メンター詳細・申請 | `/mentors/[id]` | `app/(dashboard)/mentors/[id]/page.tsx` |
-| マッチング申請一覧・承認 | `/requests` | `app/(dashboard)/requests/page.tsx` |
-| チャット | `/chat/[matchId]` | `app/(dashboard)/chat/[matchId]/page.tsx` |
+| 画面 | ルート | ファイル | 状態 |
+|---|---|---|---|
+| ログイン | `/login` | `app/(auth)/login/page.tsx` | 実装済み |
+| 新規登録 | `/signup` | `app/(auth)/signup/page.tsx` | 実装済み |
+| プロフィール | `/profile` | `app/(dashboard)/profile/page.tsx` | 未着手 |
+| メンター検索 | `/mentors` | `app/(dashboard)/mentors/page.tsx` | 未着手 |
+| メンター詳細・申請 | `/mentors/[id]` | `app/(dashboard)/mentors/[id]/page.tsx` | 未着手 |
+| マッチング申請一覧・承認 | `/requests` | `app/(dashboard)/requests/page.tsx` | 未着手 |
+| チャット | `/chat/[matchId]` | `app/(dashboard)/chat/[matchId]/page.tsx` | 未着手 |
 
-Server Actionsは各画面のファイル内（または同じディレクトリの `actions.ts`）に
-追加し、`lib/validations/` のスキーマで検証したうえで
-`lib/actions/types.ts` の `ok()` / `err()` を使って結果を返してください。
+Server Actionsは各画面のファイル内（または同じディレクトリの `actions.ts`、
+`app/(auth)/actions.ts` が実例）に追加し、`lib/validations/` のスキーマで
+検証したうえで `lib/actions/types.ts` の `ok()` / `err()` を使って結果を
+返してください。ログイン中のユーザーは `lib/supabase/server.ts` の
+`createClient()` を呼んだ後 `supabase.auth.getUser()` で取得できます。
+
+**注意:** Supabaseプロジェクトが未作成のため、認証フローはコード上は
+完成していますが実際にサインアップ/ログインしての動作確認はまだ
+できていません。プロジェクトを作成して `.env.local` を設定したら、
+最初に動作確認をお願いします。
