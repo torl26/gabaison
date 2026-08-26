@@ -844,7 +844,7 @@ describe('profileSchema', () => {
 import { describe, expect, it } from 'vitest';
 import { matchRequestSchema } from './match-request';
 
-const MENTOR_ID = '11111111-1111-1111-1111-111111111111';
+const MENTOR_ID = '11111111-1111-4111-8111-111111111111';
 
 describe('matchRequestSchema', () => {
   it('accepts a valid match request', () => {
@@ -887,7 +887,7 @@ describe('matchRequestSchema', () => {
 import { describe, expect, it } from 'vitest';
 import { messageSchema } from './message';
 
-const MATCH_ID = '22222222-2222-2222-2222-222222222222';
+const MATCH_ID = '22222222-2222-4222-8222-222222222222';
 
 describe('messageSchema', () => {
   it('accepts a valid message', () => {
