@@ -60,6 +60,18 @@ Server Actionsは各画面のファイル内（または同じディレクトリ
 できていません。プロジェクトを作成して `.env.local` を設定したら、
 最初に動作確認をお願いします。
 
+### Supabaseのメール確認について
+
+開発中はSupabaseダッシュボードの Authentication → Sign In / Providers → Email
+で **Confirm email** をOFFにしています。ONのままだとサインアップのたびに
+確認メールを送ろうとしてSupabaseのレート制限(`over_email_send_rate_limit`)
+にすぐ引っかかり、検証がしづらいためです。**本番リリース前には必ずONに
+戻してください。**
+
+新規ユーザーの `profiles` 行は `supabase/migrations/0002_profile_auto_create.sql`
+のトリガー(`handle_new_user`)が `auth.users` へのINSERT時に自動作成するので、
+Confirm emailのON/OFFに関わらずプロフィール作成自体は失敗しません。
+
 ### 開発中にログインをスキップする
 
 `.env.local` で `SKIP_AUTH=true` にすると、`getCurrentUser()` が

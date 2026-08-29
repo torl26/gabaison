@@ -23,20 +23,16 @@ export async function signupAction(
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
+    options: {
+      data: {
+        role: parsed.data.role,
+        name: parsed.data.email.split('@')[0],
+      },
+    },
   });
 
   if (error || !data.user) {
     return err(error?.message ?? 'サインアップに失敗しました');
-  }
-
-  const { error: profileError } = await supabase.from('profiles').insert({
-    id: data.user.id,
-    role: parsed.data.role,
-    name: parsed.data.email.split('@')[0],
-  });
-
-  if (profileError) {
-    return err('プロフィールの作成に失敗しました');
   }
 
   redirect('/profile');
