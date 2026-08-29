@@ -51,10 +51,20 @@ Server Actionsを実装してください。
 Server Actionsは各画面のファイル内（または同じディレクトリの `actions.ts`、
 `app/(auth)/actions.ts` が実例）に追加し、`lib/validations/` のスキーマで
 検証したうえで `lib/actions/types.ts` の `ok()` / `err()` を使って結果を
-返してください。ログイン中のユーザーは `lib/supabase/server.ts` の
-`createClient()` を呼んだ後 `supabase.auth.getUser()` で取得できます。
+返してください。ログイン中のユーザーは `supabase.auth.getUser()` を直接
+呼ぶ代わりに `lib/auth/get-current-user.ts` の `getCurrentUser()` を使って
+取得してください。
 
 **注意:** Supabaseプロジェクトが未作成のため、認証フローはコード上は
 完成していますが実際にサインアップ/ログインしての動作確認はまだ
 できていません。プロジェクトを作成して `.env.local` を設定したら、
 最初に動作確認をお願いします。
+
+### 開発中にログインをスキップする
+
+`.env.local` で `SKIP_AUTH=true` にすると、`getCurrentUser()` が
+Supabaseを呼ばずに固定のダミーユーザーを返します（本番環境では
+無視され、常に実際のSupabase認証を使います）。ログイン状態を前提と
+した画面のUIを作るだけならこれで十分ですが、`profiles` などの
+テーブルはRLSで `auth.uid()` を見ているため、実際のDB読み書きを
+検証するには本物のSupabaseログインが必要です。
