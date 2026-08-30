@@ -1,8 +1,10 @@
+import { LoginForm } from './login-form';
+
 export default function LoginPage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-4 p-8">
-      <h1 className="text-xl font-bold">ログイン</h1>
-      {/* TODO: 担当者がメール+パスワードのログインフォームを実装 */}
-    </main>
+    <div className="flex flex-col items-center justify-center min-h-screen gap-6">
+      <h1 className="text-2xl font-bold">ログイン</h1>
+      <LoginForm />
+    </div>
   );
 }
