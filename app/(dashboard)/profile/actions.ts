@@ -2,15 +2,12 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { ok, err } from '@/lib/actions/types';
 import { profileSchema } from '@/lib/validations/profile';
 
 export async function updateProfile(formData: FormData) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     return err('ログインしてください');
@@ -28,6 +25,7 @@ export async function updateProfile(formData: FormData) {
   }
 
   const { name, bio, avatarUrl, categoryKeys } = parsed.data;
+  const supabase = await createClient();
 
   const { error: updateError } = await supabase
     .from('profiles')

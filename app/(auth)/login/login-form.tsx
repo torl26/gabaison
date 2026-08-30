@@ -1,39 +1,49 @@
 'use client';
 
-import { useState } from 'react';
-import { login } from './actions';
+import Link from 'next/link';
+import { useActionState } from 'react';
+import { loginAction } from '../actions';
 
-export function LoginForm() {
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(formData: FormData) {
-    setError(null);
-    const result = await login(formData);
-    if (result && !result.success) {
-      setError(result.error ?? '不明なエラーが発生しました');
-    }
-  }
+export function LoginForm({ skipAuthEnabled }: { skipAuthEnabled: boolean }) {
+  const [state, formAction, pending] = useActionState(loginAction, null);
 
   return (
-    <form action={handleSubmit} className="flex flex-col gap-4 max-w-sm">
-      <input
-        type="email"
-        name="email"
-        placeholder="メールアドレス"
-        required
-        className="border p-2 rounded"
-      />
-      <input
-        type="password"
-        name="password"
-        placeholder="パスワード"
-        required
-        className="border p-2 rounded"
-      />
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      <button type="submit" className="bg-black text-white p-2 rounded">
-        ログイン
-      </button>
-    </form>
+    <>
+      <form action={formAction} className="flex flex-col gap-3">
+        <label className="flex flex-col gap-1 text-sm">
+          メールアドレス
+          <input
+            type="email"
+            name="email"
+            required
+            className="rounded border px-3 py-2"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          パスワード
+          <input
+            type="password"
+            name="password"
+            required
+            className="rounded border px-3 py-2"
+          />
+        </label>
+        {state && !state.success && (
+          <p className="text-sm text-red-600">{state.error}</p>
+        )}
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+        >
+          {pending ? 'ログイン中...' : 'ログイン'}
+        </button>
+      </form>
+      {skipAuthEnabled && (
+        <Link href="/profile" className="text-center text-sm underline">
+          ログインをスキップ(開発用)
+        </Link>
+      )}
+    </>
   );
 }
