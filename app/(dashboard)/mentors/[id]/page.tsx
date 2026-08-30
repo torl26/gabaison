@@ -1,14 +1,50 @@
+import { redirect } from 'next/navigation';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { createClient } from '@/lib/supabase/server';
+import { fetchMentorById } from '../get-mentors';
+import { MatchRequestForm } from './match-request-form';
+
 export default async function MentorDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect('/login');
+  }
+
   const { id } = await params;
+  const supabase = await createClient();
+  const mentor = await fetchMentorById(supabase, id);
+
+  if (!mentor) {
+    return (
+      <div>
+        <h1 className="text-xl font-bold">メンター詳細</h1>
+        <p className="mt-2 text-sm text-gray-500">メンターが見つかりません</p>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h1 className="text-xl font-bold">メンター詳細</h1>
-      <p className="text-sm text-gray-500">mentorId: {id}</p>
-      {/* TODO: 担当者がメンター情報表示・マッチング申請フォームを実装 */}
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-xl font-bold">{mentor.name}</h1>
+        <p className="mt-1 text-sm text-gray-600">{mentor.bio}</p>
+        <div className="mt-2 flex flex-wrap gap-1">
+          {mentor.categories.map((category) => (
+            <span
+              key={category.key}
+              className="rounded-full bg-gray-100 px-2 py-0.5 text-xs"
+            >
+              {category.label}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <MatchRequestForm mentorId={mentor.id} categories={mentor.categories} />
     </div>
   );
 }
