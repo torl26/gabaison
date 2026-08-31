@@ -60,3 +60,30 @@ export async function fetchMentors(
     categoryFilter
   );
 }
+
+export async function fetchMentorById(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  mentorId: string
+): Promise<MentorSummary | null> {
+  const [{ data: profile }, { data: mentorCategories }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, name, bio')
+      .eq('role', 'mentor')
+      .eq('id', mentorId)
+      .maybeSingle(),
+    supabase
+      .from('mentor_categories')
+      .select('mentor_id, category:categories(key, label)')
+      .eq('mentor_id', mentorId),
+  ]);
+
+  if (!profile) {
+    return null;
+  }
+
+  return buildMentorSummaries(
+    [profile],
+    (mentorCategories ?? []) as unknown as MentorCategoryRow[]
+  )[0];
+}

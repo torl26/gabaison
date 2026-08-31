@@ -11,6 +11,13 @@ const DEV_USER: CurrentUser = {
 };
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+
+  if (data.user) {
+    return { id: data.user.id, email: data.user.email ?? null };
+  }
+
   if (
     process.env.SKIP_AUTH === 'true' &&
     process.env.NODE_ENV !== 'production'
@@ -18,12 +25,5 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     return DEV_USER;
   }
 
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-
-  if (!data.user) {
-    return null;
-  }
-
-  return { id: data.user.id, email: data.user.email ?? null };
+  return null;
 }
