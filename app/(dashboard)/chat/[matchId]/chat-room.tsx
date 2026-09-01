@@ -20,6 +20,38 @@ export function ChatRoom({
 }: Props) {
   const [messages, setMessages] = useState(initialMessages);
   const [state, formAction, pending] = useActionState(sendMessageAction, null);
+  const [handledState, setHandledState] = useState(state);
+
+  function toChatMessage(row: MessageRow): ChatMessage {
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      senderName: participantNames[row.sender_id] ?? '不明なユーザー',
+      content: row.content,
+      createdAt: row.created_at,
+      isOwn: row.sender_id === currentUserId,
+    };
+  }
+
+  function appendMessage(row: MessageRow) {
+    setMessages((current) => {
+      if (current.some((message) => message.id === row.id)) {
+        return current;
+      }
+      return [...current, toChatMessage(row)];
+    });
+  }
+
+  // Append the sender's own message as soon as the action succeeds, instead
+  // of waiting for it to round-trip back through the realtime subscription.
+  // This adjusts state during render (React's recommended pattern for
+  // reacting to a prop/argument change) rather than in a useEffect.
+  if (state !== handledState) {
+    setHandledState(state);
+    if (state?.success) {
+      appendMessage(state.data);
+    }
+  }
 
   useEffect(() => {
     const supabase = createClient();
@@ -35,23 +67,7 @@ export function ChatRoom({
           filter: `match_id=eq.${matchId}`,
         },
         (payload) => {
-          const row = payload.new as MessageRow;
-          setMessages((current) => {
-            if (current.some((message) => message.id === row.id)) {
-              return current;
-            }
-            return [
-              ...current,
-              {
-                id: row.id,
-                senderId: row.sender_id,
-                senderName: participantNames[row.sender_id] ?? '不明なユーザー',
-                content: row.content,
-                createdAt: row.created_at,
-                isOwn: row.sender_id === currentUserId,
-              },
-            ];
-          });
+          appendMessage(payload.new as MessageRow);
         }
       )
       .subscribe();
@@ -59,7 +75,11 @@ export function ChatRoom({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [matchId, participantNames, currentUserId]);
+    // appendMessage closes over participantNames/currentUserId, which are
+    // stable for the lifetime of a chat session; matchId is the only thing
+    // that should re-run this subscription.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchId]);
 
   return (
     <div className="flex flex-col gap-4">
