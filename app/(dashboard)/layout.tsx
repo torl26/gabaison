@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { href: '/profile', label: 'プロフィール' },
   { href: '/mentors', label: 'メンターを探す' },
   { href: '/requests', label: 'マッチング申請' },
+  { href: '/chat', label: 'チャット' },
 ];
 
 export default function DashboardLayout({
