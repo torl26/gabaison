@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { signOutAction } from '../(auth)/actions';
 
 const NAV_ITEMS = [
+  { href: '/home', label: 'ホーム' },
   { href: '/profile', label: 'プロフィール' },
   { href: '/mentors', label: 'メンターを探す' },
   { href: '/requests', label: 'マッチング申請' },

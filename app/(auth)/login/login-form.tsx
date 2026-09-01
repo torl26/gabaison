@@ -40,7 +40,7 @@ export function LoginForm({ skipAuthEnabled }: { skipAuthEnabled: boolean }) {
         </button>
       </form>
       {skipAuthEnabled && (
-        <Link href="/profile" className="text-center text-sm text-primary underline">
+        <Link href="/home" className="text-center text-sm text-primary underline">
           ログインをスキップ(開発用)
         </Link>
       )}

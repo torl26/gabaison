@@ -49,7 +49,7 @@ describe('signupAction', () => {
           role: 'student',
         })
       )
-    ).rejects.toThrow('REDIRECT:/profile');
+    ).rejects.toThrow('REDIRECT:/home');
 
     expect(signUpMock).toHaveBeenCalledWith({
       email: 'student@example.com',
