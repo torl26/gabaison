@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { updateProfile } from './actions';
+import { createClient } from '@/lib/supabase/client';
+import { validateAvatarFile, buildAvatarStoragePath } from './avatar-upload';
 import type { Profile, Category } from '@/types/database';
 
 type Props = {
@@ -13,10 +15,46 @@ type Props = {
 export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '');
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const validationError = validateAvatarFile(file);
+    if (validationError) {
+      setAvatarError(validationError);
+      return;
+    }
+
+    setAvatarError(null);
+    setUploading(true);
+
+    const supabase = createClient();
+    const path = buildAvatarStoragePath(profile.id, file.name);
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true });
+
+    setUploading(false);
+
+    if (uploadError) {
+      setAvatarError('アップロードに失敗しました: ' + uploadError.message);
+      return;
+    }
+
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+    setAvatarUrl(`${data.publicUrl}?t=${Date.now()}`);
+  }
 
   async function handleSubmit(formData: FormData) {
     setError(null);
     setSaved(false);
+    formData.set('avatarUrl', avatarUrl);
     const result = await updateProfile(formData);
     if (result && !result.success) {
       setError(result.error);
@@ -49,14 +87,23 @@ export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm text-gray-500">アイコン画像URL</span>
+        <span className="text-sm text-gray-500">アイコン画像</span>
+        {avatarUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatarUrl}
+            alt=""
+            className="h-16 w-16 rounded-full object-cover"
+          />
+        )}
         <input
-          type="text"
-          name="avatarUrl"
-          defaultValue={profile.avatar_url ?? ''}
-          placeholder="https://..."
-          className="border p-2 rounded"
+          type="file"
+          accept="image/*"
+          onChange={handleAvatarChange}
+          className="text-sm"
         />
+        {uploading && <span className="text-sm text-gray-500">アップロード中...</span>}
+        {avatarError && <p className="text-red-500 text-sm">{avatarError}</p>}
       </label>
 
       {profile.role === 'mentor' && (
