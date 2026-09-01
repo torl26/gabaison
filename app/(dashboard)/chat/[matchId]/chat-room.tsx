@@ -67,8 +67,10 @@ export function ChatRoom({
         {messages.map((message) => (
           <li
             key={message.id}
-            className={`max-w-md rounded p-2 text-sm ${
-              message.isOwn ? 'ml-auto bg-black text-white' : 'bg-gray-100'
+            className={`max-w-md rounded-2xl p-3 text-sm ${
+              message.isOwn
+                ? 'ml-auto bg-primary text-primary-foreground'
+                : 'border border-border bg-surface text-foreground'
             }`}
           >
             <p className="text-xs opacity-70">{message.senderName}</p>
@@ -83,13 +85,13 @@ export function ChatRoom({
           type="text"
           name="content"
           required
-          className="flex-1 rounded border px-3 py-2"
+          className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           placeholder="メッセージを入力"
         />
         <button
           type="submit"
           disabled={pending}
-          className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+          className="rounded-lg bg-primary px-4 py-2 text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
         >
           送信
         </button>

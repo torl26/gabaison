@@ -19,7 +19,7 @@ export function RequestActions({ requestId }: Props) {
           <button
             type="submit"
             disabled={pending}
-            className="rounded bg-black px-3 py-1 text-sm text-white disabled:opacity-50"
+            className="rounded-lg bg-primary px-3 py-1 text-sm text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
           >
             承認
           </button>
@@ -30,7 +30,7 @@ export function RequestActions({ requestId }: Props) {
           <button
             type="submit"
             disabled={pending}
-            className="rounded border px-3 py-1 text-sm disabled:opacity-50"
+            className="rounded-lg border border-border px-3 py-1 text-sm text-foreground transition hover:bg-background disabled:opacity-50"
           >
             却下
           </button>

@@ -66,56 +66,57 @@ export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props
   return (
     <form action={handleSubmit} className="flex flex-col gap-4 max-w-md">
       <label className="flex flex-col gap-1">
-        <span className="text-sm text-gray-500">名前</span>
+        <span className="text-sm text-muted">名前</span>
         <input
           type="text"
           name="name"
           defaultValue={profile.name}
           required
-          className="border p-2 rounded"
+          className="rounded-lg border border-border bg-surface p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm text-gray-500">自己紹介</span>
+        <span className="text-sm text-muted">自己紹介</span>
         <textarea
           name="bio"
           defaultValue={profile.bio}
           rows={4}
-          className="border p-2 rounded"
+          className="rounded-lg border border-border bg-surface p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm text-gray-500">アイコン画像</span>
+        <span className="text-sm text-muted">アイコン画像</span>
         {avatarUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={avatarUrl}
             alt=""
-            className="h-16 w-16 rounded-full object-cover"
+            className="h-16 w-16 rounded-full border border-border object-cover"
           />
         )}
         <input
           type="file"
           accept="image/png,image/jpeg,image/webp,image/gif"
           onChange={handleAvatarChange}
-          className="text-sm"
+          className="text-sm text-muted"
         />
-        {uploading && <span className="text-sm text-gray-500">アップロード中...</span>}
+        {uploading && <span className="text-sm text-muted">アップロード中...</span>}
         {avatarError && <p className="text-red-500 text-sm">{avatarError}</p>}
       </label>
 
       {profile.role === 'mentor' && (
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm text-gray-500">対応カテゴリ</legend>
+          <legend className="text-sm text-muted">対応カテゴリ</legend>
           {categories.map((category) => (
-            <label key={category.id} className="flex items-center gap-2">
+            <label key={category.id} className="flex items-center gap-2 text-foreground">
               <input
                 type="checkbox"
                 name="categoryKeys"
                 value={category.key}
                 defaultChecked={selectedCategoryKeys.includes(category.key)}
+                className="accent-primary"
               />
               {category.label}
             </label>
@@ -124,9 +125,12 @@ export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props
       )}
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      {saved && <p className="text-green-600 text-sm">保存しました</p>}
+      {saved && <p className="text-sm text-green-600">保存しました</p>}
 
-      <button type="submit" className="bg-black text-white p-2 rounded">
+      <button
+        type="submit"
+        className="rounded-lg bg-primary p-2 text-primary-foreground transition hover:opacity-90"
+      >
         保存
       </button>
     </form>

@@ -11,6 +11,12 @@ const STATUS_LABELS = {
   rejected: '却下',
 };
 
+const STATUS_BADGE_STYLES = {
+  pending: 'bg-amber-100 text-amber-700',
+  accepted: 'bg-green-100 text-green-700',
+  rejected: 'bg-stone-200 text-stone-600',
+};
+
 export default async function RequestsPage() {
   const user = await getCurrentUser();
   if (!user) {
@@ -22,23 +28,28 @@ export default async function RequestsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-bold">マッチング申請</h1>
+      <h1 className="text-xl font-bold text-foreground">マッチング申請</h1>
 
       {requests.length === 0 ? (
-        <p className="text-sm text-gray-500">申請はまだありません。</p>
+        <p className="text-sm text-muted">申請はまだありません。</p>
       ) : (
         <ul className="flex flex-col gap-4">
           {requests.map((request) => (
-            <li key={request.id} className="rounded border p-4">
+            <li
+              key={request.id}
+              className="rounded-xl border border-border bg-surface p-4 shadow-sm"
+            >
               <div className="flex items-center justify-between">
-                <span className="font-bold">{request.counterpartName}</span>
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs">
+                <span className="font-bold text-foreground">{request.counterpartName}</span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs ${STATUS_BADGE_STYLES[request.status]}`}
+                >
                   {STATUS_LABELS[request.status]}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-gray-600">{request.category.label}</p>
+              <p className="mt-1 text-sm text-muted">{request.category.label}</p>
               {request.message && (
-                <p className="mt-2 text-sm text-gray-800">{request.message}</p>
+                <p className="mt-2 text-sm text-foreground">{request.message}</p>
               )}
 
               {request.isMentor && request.status === 'pending' && (
@@ -50,7 +61,7 @@ export default async function RequestsPage() {
               {request.status === 'accepted' && (
                 <Link
                   href={`/chat/${request.id}`}
-                  className="mt-3 inline-block text-sm underline"
+                  className="mt-3 inline-block text-sm text-primary underline"
                 >
                   チャットへ
                 </Link>
