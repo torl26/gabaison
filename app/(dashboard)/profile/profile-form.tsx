@@ -35,7 +35,7 @@ export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props
     setUploading(true);
 
     const supabase = createClient();
-    const path = buildAvatarStoragePath(profile.id, file.name);
+    const path = buildAvatarStoragePath(profile.id, file.type);
     const { error: uploadError } = await supabase.storage
       .from('avatars')
       .upload(path, file, { upsert: true });
@@ -98,7 +98,7 @@ export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props
         )}
         <input
           type="file"
-          accept="image/*"
+          accept="image/png,image/jpeg,image/webp,image/gif"
           onChange={handleAvatarChange}
           className="text-sm"
         />
