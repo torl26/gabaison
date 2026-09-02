@@ -22,7 +22,7 @@ vi.mock('next/cache', () => ({
   revalidatePath: revalidatePathMock,
 }));
 
-import { respondToMatchRequestAction } from './actions';
+import { cancelMatchRequestAction, respondToMatchRequestAction } from './actions';
 
 const REQUEST_ID = '11111111-1111-4111-8111-111111111111';
 
@@ -94,6 +94,75 @@ describe('respondToMatchRequestAction', () => {
     const result = await respondToMatchRequestAction(
       null,
       formDataFor({ requestId: REQUEST_ID, decision: 'rejected' })
+    );
+
+    expect(result.success).toBe(false);
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('cancelMatchRequestAction', () => {
+  afterEach(() => {
+    getCurrentUserMock.mockReset();
+    fromMock.mockReset();
+    updateMock.mockReset();
+    eqMock.mockReset();
+    revalidatePathMock.mockReset();
+  });
+
+  it('returns an error when nobody is logged in, without touching Supabase', async () => {
+    getCurrentUserMock.mockResolvedValue(null);
+
+    const result = await cancelMatchRequestAction(
+      null,
+      formDataFor({ requestId: REQUEST_ID })
+    );
+
+    expect(result).toEqual({ success: false, error: 'ログインしてください' });
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects an invalid requestId before touching Supabase', async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+
+    const result = await cancelMatchRequestAction(
+      null,
+      formDataFor({ requestId: 'not-a-uuid' })
+    );
+
+    expect(result.success).toBe(false);
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it('cancels the request and revalidates /requests on success', async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+    eqMock.mockResolvedValue({ error: null });
+    updateMock.mockReturnValue({ eq: eqMock });
+    fromMock.mockReturnValue({ update: updateMock });
+
+    const result = await cancelMatchRequestAction(
+      null,
+      formDataFor({ requestId: REQUEST_ID })
+    );
+
+    expect(fromMock).toHaveBeenCalledWith('match_requests');
+    expect(updateMock).toHaveBeenCalledWith({ status: 'cancelled' });
+    expect(eqMock).toHaveBeenCalledWith('id', REQUEST_ID);
+    expect(revalidatePathMock).toHaveBeenCalledWith('/requests');
+    expect(result).toEqual({ success: true, data: undefined });
+  });
+
+  it('returns an error when the update fails (e.g. not a pending request owned by this student)', async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+    eqMock.mockResolvedValue({
+      error: { message: 'student can only cancel a pending request' },
+    });
+    updateMock.mockReturnValue({ eq: eqMock });
+    fromMock.mockReturnValue({ update: updateMock });
+
+    const result = await cancelMatchRequestAction(
+      null,
+      formDataFor({ requestId: REQUEST_ID })
     );
 
     expect(result.success).toBe(false);

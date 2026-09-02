@@ -21,7 +21,7 @@ export interface MentorCategory {
   category_id: number;
 }
 
-export type MatchRequestStatus = 'pending' | 'accepted' | 'rejected';
+export type MatchRequestStatus = 'pending' | 'accepted' | 'rejected' | 'cancelled';
 
 export interface MatchRequest {
   id: string;

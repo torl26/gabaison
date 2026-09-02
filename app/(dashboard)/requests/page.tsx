@@ -4,12 +4,14 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
 import { fetchMatchRequests } from './get-requests';
 import { RequestActions } from './request-actions';
+import { RequestCancelAction } from './request-cancel-action';
 import { STATUS_LABELS } from '@/lib/constants/match-request-status';
 
 const STATUS_BADGE_STYLES = {
   pending: 'bg-amber-100 text-amber-700',
   accepted: 'bg-green-100 text-green-700',
   rejected: 'bg-stone-200 text-stone-600',
+  cancelled: 'bg-stone-200 text-stone-500',
 };
 
 export default async function RequestsPage() {
@@ -50,6 +52,12 @@ export default async function RequestsPage() {
               {request.isMentor && request.status === 'pending' && (
                 <div className="mt-3">
                   <RequestActions requestId={request.id} />
+                </div>
+              )}
+
+              {!request.isMentor && request.status === 'pending' && (
+                <div className="mt-3">
+                  <RequestCancelAction requestId={request.id} />
                 </div>
               )}
 
