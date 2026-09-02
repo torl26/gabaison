@@ -38,7 +38,17 @@ export default async function RequestsPage() {
               className="rounded-xl border border-border bg-surface p-4 shadow-sm"
             >
               <div className="flex items-center justify-between">
-                <span className="font-bold text-foreground">{request.counterpartName}</span>
+                <div className="flex items-center gap-2">
+                  {request.counterpartAvatarUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={request.counterpartAvatarUrl}
+                      alt=""
+                      className="h-8 w-8 rounded-full border border-border object-cover"
+                    />
+                  )}
+                  <span className="font-bold text-foreground">{request.counterpartName}</span>
+                </div>
                 <span
                   className={`rounded-full px-2 py-0.5 text-xs ${STATUS_BADGE_STYLES[request.status]}`}
                 >
@@ -49,6 +59,12 @@ export default async function RequestsPage() {
               {request.message && (
                 <p className="mt-2 text-sm text-foreground">{request.message}</p>
               )}
+              <Link
+                href={`/users/${request.counterpartId}`}
+                className="mt-2 inline-block text-sm text-primary underline"
+              >
+                プロフィールを見る
+              </Link>
 
               {request.isMentor && request.status === 'pending' && (
                 <div className="mt-3">

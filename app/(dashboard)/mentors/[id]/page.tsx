@@ -30,7 +30,17 @@ export default async function MentorDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-bold text-foreground">{mentor.name}</h1>
+        <div className="flex items-center gap-3">
+          {mentor.avatarUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={mentor.avatarUrl}
+              alt=""
+              className="h-12 w-12 rounded-full border border-border object-cover"
+            />
+          )}
+          <h1 className="text-xl font-bold text-foreground">{mentor.name}</h1>
+        </div>
         <p className="mt-1 text-sm text-muted">{mentor.bio}</p>
         <div className="mt-2 flex flex-wrap gap-1">
           {mentor.categories.map((category) => (

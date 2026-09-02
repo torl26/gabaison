@@ -66,12 +66,22 @@ export default async function MentorsPage({
               key={mentor.id}
               className="rounded-xl border border-border bg-surface p-4 shadow-sm"
             >
-              <Link
-                href={`/mentors/${mentor.id}`}
-                className="font-bold text-foreground underline"
-              >
-                {mentor.name}
-              </Link>
+              <div className="flex items-center gap-3">
+                {mentor.avatarUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={mentor.avatarUrl}
+                    alt=""
+                    className="h-10 w-10 rounded-full border border-border object-cover"
+                  />
+                )}
+                <Link
+                  href={`/mentors/${mentor.id}`}
+                  className="font-bold text-foreground underline"
+                >
+                  {mentor.name}
+                </Link>
+              </div>
               <p className="mt-1 text-sm text-muted">{mentor.bio}</p>
               <div className="mt-2 flex flex-wrap gap-1">
                 {mentor.categories.map((c) => (

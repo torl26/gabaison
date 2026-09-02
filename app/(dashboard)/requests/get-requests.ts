@@ -15,6 +15,7 @@ export interface MatchRequestRow {
 export interface ProfileNameRow {
   id: string;
   name: string;
+  avatar_url: string | null;
 }
 
 export interface CategoryRow {
@@ -30,6 +31,7 @@ export interface MatchRequestSummary {
   createdAt: string;
   counterpartId: string;
   counterpartName: string;
+  counterpartAvatarUrl: string | null;
   category: CategoryDefinition;
   isMentor: boolean;
 }
@@ -41,6 +43,7 @@ export function buildMatchRequestSummaries(
   currentUserId: string
 ): MatchRequestSummary[] {
   const nameById = new Map(profiles.map((profile) => [profile.id, profile.name]));
+  const avatarUrlById = new Map(profiles.map((profile) => [profile.id, profile.avatar_url]));
   const categoryById = new Map(
     categories.map((category) => [category.id, { key: category.key, label: category.label }])
   );
@@ -56,6 +59,7 @@ export function buildMatchRequestSummaries(
       createdAt: request.created_at,
       counterpartId,
       counterpartName: nameById.get(counterpartId) ?? '不明なユーザー',
+      counterpartAvatarUrl: avatarUrlById.get(counterpartId) ?? null,
       category: categoryById.get(request.category_id) ?? { key: 'career', label: '不明' },
       isMentor,
     };
@@ -80,7 +84,7 @@ export async function fetchMatchRequests(
 
   const [{ data: profiles }, { data: categories }] = await Promise.all([
     profileIds.length > 0
-      ? supabase.from('profiles').select('id, name').in('id', profileIds)
+      ? supabase.from('profiles').select('id, name, avatar_url').in('id', profileIds)
       : Promise.resolve({ data: [] as ProfileNameRow[] }),
     supabase.from('categories').select('id, key, label'),
   ]);

@@ -44,11 +44,21 @@ export default async function ChatPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <h1 className="text-xl font-bold text-foreground">{context.counterpartName}さんとのチャット</h1>
-        <Link href={`/users/${context.counterpartId}`} className="text-sm text-primary underline">
-          プロフィール
-        </Link>
+      <div className="flex items-center gap-3">
+        {context.counterpartAvatarUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={context.counterpartAvatarUrl}
+            alt=""
+            className="h-10 w-10 rounded-full border border-border object-cover"
+          />
+        )}
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-bold text-foreground">{context.counterpartName}さんとのチャット</h1>
+          <Link href={`/users/${context.counterpartId}`} className="text-sm text-primary underline">
+            プロフィール
+          </Link>
+        </div>
       </div>
       <ChatRoom
         matchId={matchId}

@@ -42,6 +42,7 @@ export interface ChatContext {
   participantNames: Record<string, string>;
   counterpartId: string;
   counterpartName: string;
+  counterpartAvatarUrl: string | null;
 }
 
 export async function fetchChatContext(
@@ -64,11 +65,14 @@ export async function fetchChatContext(
 
   const { data: profiles } = await supabase
     .from('profiles')
-    .select('id, name')
+    .select('id, name, avatar_url')
     .in('id', [matchRequest.student_id, matchRequest.mentor_id]);
 
   const participantNames = Object.fromEntries(
     (profiles ?? []).map((profile) => [profile.id, profile.name])
+  );
+  const avatarUrlById = Object.fromEntries(
+    (profiles ?? []).map((profile) => [profile.id, profile.avatar_url as string | null])
   );
 
   const counterpartId =
@@ -80,6 +84,7 @@ export async function fetchChatContext(
     participantNames,
     counterpartId,
     counterpartName: participantNames[counterpartId] ?? '不明なユーザー',
+    counterpartAvatarUrl: avatarUrlById[counterpartId] ?? null,
   };
 }
 

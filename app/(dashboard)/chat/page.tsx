@@ -35,16 +35,26 @@ export default async function ChatListPage() {
               key={chat.id}
               className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-sm transition hover:border-primary"
             >
-              <Link href={`/chat/${chat.id}`} className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-bold text-foreground">{chat.counterpartName}</p>
-                  {unreadCounts[chat.id] > 0 && (
-                    <span className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                      {unreadCounts[chat.id]}
-                    </span>
-                  )}
+              <Link href={`/chat/${chat.id}`} className="flex flex-1 items-center gap-3">
+                {chat.counterpartAvatarUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={chat.counterpartAvatarUrl}
+                    alt=""
+                    className="h-10 w-10 rounded-full border border-border object-cover"
+                  />
+                )}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-foreground">{chat.counterpartName}</p>
+                    {unreadCounts[chat.id] > 0 && (
+                      <span className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                        {unreadCounts[chat.id]}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted">{chat.category.label}</p>
                 </div>
-                <p className="text-sm text-muted">{chat.category.label}</p>
               </Link>
               <div className="flex items-center gap-3">
                 <Link href={`/users/${chat.counterpartId}`} className="text-sm text-primary underline">
