@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMentorSummaries } from './get-mentors';
+import { buildMentorSummaries, excludeMentorsWithoutCategories } from './get-mentors';
 
 const profiles = [
   { id: 'mentor-1', name: 'タロウ', bio: 'キャリア相談が得意です' },
@@ -56,5 +56,29 @@ describe('buildMentorSummaries', () => {
     const result = buildMentorSummaries(profiles, mentorCategories);
 
     expect(result.map((m) => m.id)).toEqual(['mentor-1', 'mentor-2']);
+  });
+});
+
+describe('excludeMentorsWithoutCategories', () => {
+  it('drops a mentor who has not selected any category', () => {
+    const result = excludeMentorsWithoutCategories([
+      { id: 'mentor-1', name: 'タロウ', bio: '', categories: [{ key: 'career', label: 'キャリア相談' }] },
+      { id: 'mentor-2', name: 'ハナコ', bio: '', categories: [] },
+    ]);
+
+    expect(result.map((m) => m.id)).toEqual(['mentor-1']);
+  });
+
+  it('keeps every mentor when all of them have at least one category', () => {
+    const mentors = [
+      {
+        id: 'mentor-1',
+        name: 'タロウ',
+        bio: '',
+        categories: [{ key: 'career' as const, label: 'キャリア相談' }],
+      },
+    ];
+
+    expect(excludeMentorsWithoutCategories(mentors)).toEqual(mentors);
   });
 });

@@ -43,6 +43,10 @@ export function buildMentorSummaries(
     );
 }
 
+export function excludeMentorsWithoutCategories(mentors: MentorSummary[]): MentorSummary[] {
+  return mentors.filter((mentor) => mentor.categories.length > 0);
+}
+
 export async function fetchMentors(
   supabase: Awaited<ReturnType<typeof createClient>>,
   categoryFilter?: CategoryKey
@@ -54,11 +58,13 @@ export async function fetchMentors(
       .select('mentor_id, category:categories(key, label)'),
   ]);
 
-  return buildMentorSummaries(
+  const summaries = buildMentorSummaries(
     profiles ?? [],
     (mentorCategories ?? []) as unknown as MentorCategoryRow[],
     categoryFilter
   );
+
+  return excludeMentorsWithoutCategories(summaries);
 }
 
 export async function fetchMentorById(
