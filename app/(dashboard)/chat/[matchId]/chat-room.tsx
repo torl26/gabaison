@@ -129,8 +129,10 @@ export function ChatRoom({
               <p className="text-xs opacity-70">{message.senderName}</p>
               <p>{message.content}</p>
             </div>
-            {message.isOwn && message.readAt && (
-              <span className="shrink-0 text-xs text-muted">既読</span>
+            {message.isOwn && (
+              <span className="shrink-0 text-xs text-muted">
+                {message.readAt ? '既読' : '未読'}
+              </span>
             )}
           </li>
         ))}
