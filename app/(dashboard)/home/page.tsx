@@ -4,6 +4,27 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
 import { fetchMatchRequests } from '../requests/get-requests';
 
+const DUMMY_EVENTS = [
+  {
+    icon: '🎤',
+    date: '9/20(土) 19:00〜',
+    title: 'オンライン交流会',
+    description: '先輩メンターと気軽に話せるオンラインイベントです。',
+  },
+  {
+    icon: '📚',
+    date: '9/27(日) 14:00〜',
+    title: '就活対策セミナー',
+    description: 'ES添削と面接対策のポイントを現役メンターが解説します。',
+  },
+  {
+    icon: '💻',
+    date: '10/4(土)〜5(日)',
+    title: 'ハッカソン参加者募集',
+    description: 'チームを組んで短期間の開発に挑戦するイベントです。',
+  },
+];
+
 const LINKS = [
   {
     href: '/mentors',
@@ -52,8 +73,24 @@ export default async function HomePage() {
         <p className="mt-2 text-sm opacity-90">今日もマッチングを進めましょう ✨</p>
       </div>
 
-      <div className="flex items-center justify-center rounded-xl border border-dashed border-border bg-surface/50 p-6 text-sm text-muted">
-        広告枠（準備中）
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold text-foreground">イベント情報</h2>
+          <span className="rounded-full bg-surface px-2 py-0.5 text-xs text-muted">PR</span>
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-1">
+          {DUMMY_EVENTS.map((event) => (
+            <div
+              key={event.title}
+              className="flex w-64 shrink-0 flex-col gap-2 rounded-xl border border-border bg-surface p-4 shadow-sm"
+            >
+              <span className="text-3xl">{event.icon}</span>
+              <span className="text-xs font-bold text-primary">{event.date}</span>
+              <span className="font-bold text-foreground">{event.title}</span>
+              <p className="text-sm text-muted">{event.description}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       <ul className="grid flex-1 auto-rows-fr gap-4 sm:grid-cols-3">
