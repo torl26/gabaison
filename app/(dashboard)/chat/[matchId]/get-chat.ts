@@ -7,6 +7,7 @@ export interface MessageRow {
   sender_id: string;
   content: string;
   created_at: string;
+  read_at: string | null;
 }
 
 export interface ChatMessage {
@@ -15,6 +16,7 @@ export interface ChatMessage {
   senderName: string;
   content: string;
   createdAt: string;
+  readAt: string | null;
   isOwn: boolean;
 }
 
@@ -29,6 +31,7 @@ export function buildChatMessages(
     senderName: participantNames[message.sender_id] ?? '不明なユーザー',
     content: message.content,
     createdAt: message.created_at,
+    readAt: message.read_at,
     isOwn: message.sender_id === currentUserId,
   }));
 }
@@ -84,7 +87,7 @@ export async function fetchMessages(
 ): Promise<MessageRow[]> {
   const { data } = await supabase
     .from('messages')
-    .select('id, match_id, sender_id, content, created_at')
+    .select('id, match_id, sender_id, content, created_at, read_at')
     .eq('match_id', matchId)
     .order('created_at', { ascending: true });
 

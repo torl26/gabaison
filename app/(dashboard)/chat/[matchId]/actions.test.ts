@@ -1,11 +1,25 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const { getCurrentUserMock, fromMock, insertMock, selectMock, singleMock } = vi.hoisted(() => ({
+const {
+  getCurrentUserMock,
+  fromMock,
+  insertMock,
+  selectMock,
+  singleMock,
+  updateMock,
+  eqMock,
+  neqMock,
+  isMock,
+} = vi.hoisted(() => ({
   getCurrentUserMock: vi.fn(),
   fromMock: vi.fn(),
   insertMock: vi.fn(),
   selectMock: vi.fn(),
   singleMock: vi.fn(),
+  updateMock: vi.fn(),
+  eqMock: vi.fn(),
+  neqMock: vi.fn(),
+  isMock: vi.fn(),
 }));
 
 vi.mock('@/lib/auth/get-current-user', () => ({
@@ -16,7 +30,7 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: () => Promise.resolve({ from: fromMock }),
 }));
 
-import { sendMessageAction } from './actions';
+import { sendMessageAction, markMessagesAsRead } from './actions';
 
 const MATCH_ID = '22222222-2222-4222-8222-222222222222';
 
@@ -102,5 +116,41 @@ describe('sendMessageAction', () => {
     );
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe('markMessagesAsRead', () => {
+  afterEach(() => {
+    getCurrentUserMock.mockReset();
+    fromMock.mockReset();
+    updateMock.mockReset();
+    eqMock.mockReset();
+    neqMock.mockReset();
+    isMock.mockReset();
+  });
+
+  it('does nothing when nobody is logged in', async () => {
+    getCurrentUserMock.mockResolvedValue(null);
+
+    await markMessagesAsRead(MATCH_ID);
+
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it("marks the other participant's unread messages as read", async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+    isMock.mockResolvedValue({ error: null });
+    neqMock.mockReturnValue({ is: isMock });
+    eqMock.mockReturnValue({ neq: neqMock });
+    updateMock.mockReturnValue({ eq: eqMock });
+    fromMock.mockReturnValue({ update: updateMock });
+
+    await markMessagesAsRead(MATCH_ID);
+
+    expect(fromMock).toHaveBeenCalledWith('messages');
+    expect(updateMock).toHaveBeenCalledWith({ read_at: expect.any(String) });
+    expect(eqMock).toHaveBeenCalledWith('match_id', MATCH_ID);
+    expect(neqMock).toHaveBeenCalledWith('sender_id', 'student-1');
+    expect(isMock).toHaveBeenCalledWith('read_at', null);
   });
 });

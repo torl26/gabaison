@@ -34,7 +34,7 @@ export async function sendMessageAction(
       sender_id: user.id,
       content: parsed.data.content,
     })
-    .select('id, match_id, sender_id, content, created_at')
+    .select('id, match_id, sender_id, content, created_at, read_at')
     .single();
 
   if (error || !data) {
@@ -42,4 +42,21 @@ export async function sendMessageAction(
   }
 
   return ok(data as MessageRow);
+}
+
+export async function markMessagesAsRead(matchId: string): Promise<void> {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return;
+  }
+
+  const supabase = await createClient();
+
+  await supabase
+    .from('messages')
+    .update({ read_at: new Date().toISOString() })
+    .eq('match_id', matchId)
+    .neq('sender_id', user.id)
+    .is('read_at', null);
 }

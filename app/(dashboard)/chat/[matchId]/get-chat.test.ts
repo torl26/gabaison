@@ -10,6 +10,7 @@ const messages = [
     sender_id: CURRENT_USER_ID,
     content: 'こんにちは',
     created_at: '2026-08-01T00:00:00Z',
+    read_at: '2026-08-01T00:05:00Z',
   },
   {
     id: 'msg-2',
@@ -17,6 +18,7 @@ const messages = [
     sender_id: 'mentor-1',
     content: 'よろしくお願いします',
     created_at: '2026-08-01T00:01:00Z',
+    read_at: null,
   },
 ];
 
@@ -59,6 +61,7 @@ describe('buildChatMessages', () => {
           sender_id: 'unknown-user',
           content: 'hi',
           created_at: '2026-08-01T00:02:00Z',
+          read_at: null,
         },
       ],
       participantNames,
@@ -66,5 +69,12 @@ describe('buildChatMessages', () => {
     );
 
     expect(result[0].senderName).toBe('不明なユーザー');
+  });
+
+  it('carries through readAt', () => {
+    const result = buildChatMessages(messages, participantNames, CURRENT_USER_ID);
+
+    expect(result[0].readAt).toBe('2026-08-01T00:05:00Z');
+    expect(result[1].readAt).toBeNull();
   });
 });
