@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { signOutAction } from '../(auth)/actions';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
-import { createClient } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/auth/is-admin';
 
 const NAV_ITEMS = [
   { href: '/home', label: 'ホーム' },
@@ -17,17 +17,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const user = await getCurrentUser();
-  let isAdmin = false;
-
-  if (user) {
-    const supabase = await createClient();
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle();
-    isAdmin = profile?.role === 'admin';
-  }
+  const userIsAdmin = user ? await isAdmin(user.id) : false;
 
   return (
     <div className="min-h-screen">
@@ -39,7 +29,7 @@ export default async function DashboardLayout({
               {item.label}
             </Link>
           ))}
-          {isAdmin && (
+          {userIsAdmin && (
             <Link href="/admin" className="text-sm text-primary">
               管理者画面
             </Link>

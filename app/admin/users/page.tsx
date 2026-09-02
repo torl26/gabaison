@@ -1,13 +1,9 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { requireAdmin } from '@/lib/auth/require-admin';
 import { fetchAllUsers } from './get-admin-users';
 import type { ProfileRole } from '@/types/database';
-
-const ROLE_LABELS: Record<ProfileRole, string> = {
-  student: '学生',
-  mentor: 'メンター',
-  admin: '管理者',
-};
+import { ROLE_LABELS } from '@/lib/constants/roles';
 
 const ROLE_OPTIONS: ProfileRole[] = ['student', 'mentor', 'admin'];
 
@@ -20,6 +16,8 @@ export default async function AdminUsersPage({
 }: {
   searchParams: Promise<{ role?: string }>;
 }) {
+  await requireAdmin();
+
   const { role } = await searchParams;
   const roleFilter = isProfileRole(role) ? role : undefined;
 
@@ -66,7 +64,12 @@ export default async function AdminUsersPage({
                 href={`/admin/users/${user.id}`}
                 className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-sm transition hover:border-primary"
               >
-                <span className="font-bold text-foreground">{user.name}</span>
+                <div>
+                  <span className="font-bold text-foreground">{user.name}</span>
+                  <p className="text-sm text-muted">
+                    登録日: {new Date(user.createdAt).toLocaleDateString('ja-JP')}
+                  </p>
+                </div>
                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
                   {ROLE_LABELS[user.role]}
                 </span>

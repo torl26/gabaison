@@ -1,7 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
+import { requireAdmin } from '@/lib/auth/require-admin';
 import { fetchAdminStats } from './get-admin-stats';
 
 export default async function AdminOverviewPage() {
+  await requireAdmin();
+
   const supabase = await createClient();
   const stats = await fetchAdminStats(supabase);
 

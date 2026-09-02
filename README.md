@@ -93,10 +93,16 @@ admin権限はアプリの画面からは付与できません。SQLで直接プ
 書き換えてください。
 
 ```sql
+begin;
 alter table public.profiles disable trigger profiles_prevent_role_change;
 update public.profiles set role = 'admin' where id = '<対象のprofiles.id>';
 alter table public.profiles enable trigger profiles_prevent_role_change;
+commit;
 ```
+
+admin権限を付与すると、そのアカウントは管理画面に表示される集計値だけでなく、
+アプリの通常のSupabaseクライアント経由で全マッチング申請・全メッセージ本文にも
+RLS上読み取り可能になる点に注意してください。
 
 SQLで権限を変更してから改めてログインすると、ダッシュボードのナビゲーション右部に
 「管理者画面」へのリンクが表示されます。

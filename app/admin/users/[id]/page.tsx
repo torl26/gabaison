@@ -1,27 +1,31 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { requireAdmin } from '@/lib/auth/require-admin';
 import { fetchUserDetail } from './get-user-detail';
 import { fetchMatchRequests } from '@/app/(dashboard)/requests/get-requests';
-import type { ProfileRole, MatchRequestStatus } from '@/types/database';
+import { ROLE_LABELS } from '@/lib/constants/roles';
+import { STATUS_LABELS } from '@/lib/constants/match-request-status';
 
-const ROLE_LABELS: Record<ProfileRole, string> = {
-  student: '学生',
-  mentor: 'メンター',
-  admin: '管理者',
-};
-
-const STATUS_LABELS: Record<MatchRequestStatus, string> = {
-  pending: '審査中',
-  accepted: '承認済み',
-  rejected: '却下',
-};
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default async function AdminUserDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireAdmin();
+
   const { id } = await params;
+
+  if (!UUID_PATTERN.test(id)) {
+    return (
+      <div>
+        <h1 className="text-xl font-bold text-foreground">ユーザー詳細</h1>
+        <p className="mt-2 text-sm text-muted">見つかりません</p>
+      </div>
+    );
+  }
+
   const supabase = await createClient();
 
   const detail = await fetchUserDetail(supabase, id);
