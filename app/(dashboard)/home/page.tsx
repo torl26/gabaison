@@ -44,9 +44,9 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/70 p-8 text-primary-foreground shadow-md">
+      <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/70 p-6 text-primary-foreground shadow-md sm:p-8">
         <p className="text-sm opacity-90">おかえりなさい</p>
-        <h1 className="mt-1 text-3xl font-bold">
+        <h1 className="mt-1 text-2xl font-bold break-words sm:text-3xl">
           {profile?.name ? `ようこそ、${profile.name}さん` : 'ようこそ'}
         </h1>
         <p className="mt-2 text-sm opacity-90">今日もマッチングを進めましょう ✨</p>

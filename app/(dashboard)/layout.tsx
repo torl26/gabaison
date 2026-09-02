@@ -21,9 +21,9 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen">
-      <header className="flex items-center justify-between border-b border-border bg-surface p-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border bg-surface p-4">
         <span className="font-bold text-primary">学生-メンター マッチング</span>
-        <nav className="flex items-center gap-4">
+        <nav className="flex flex-wrap items-center gap-x-3 gap-y-2">
           {NAV_ITEMS.map((item) => (
             <Link key={item.href} href={item.href} className="text-sm text-foreground">
               {item.label}
@@ -41,7 +41,7 @@ export default async function DashboardLayout({
           </form>
         </nav>
       </header>
-      <div className="p-8">{children}</div>
+      <div className="p-4 sm:p-8">{children}</div>
     </div>
   );
 }
