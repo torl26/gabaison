@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
-import { fetchUserProfile } from './get-user-profile';
+import { fetchUserProfile } from '@/lib/profile/get-user-profile';
 import { ROLE_LABELS } from '@/lib/constants/roles';
 
 export default async function UserProfilePage({
