@@ -43,7 +43,7 @@ export default async function HomePage() {
   const pendingCount = requests.filter((r) => r.status === 'pending').length;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-1 flex-col gap-6">
       <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/70 p-6 text-primary-foreground shadow-md sm:p-8">
         <p className="text-sm opacity-90">おかえりなさい</p>
         <h1 className="mt-1 text-2xl font-bold break-words sm:text-3xl">
@@ -56,22 +56,22 @@ export default async function HomePage() {
         広告枠（準備中）
       </div>
 
-      <ul className="grid gap-4 sm:grid-cols-3">
+      <ul className="grid flex-1 auto-rows-fr gap-4 sm:grid-cols-3">
         {LINKS.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="flex h-full flex-col gap-2 rounded-xl border border-border bg-surface p-4 shadow-sm transition hover:-translate-y-1 hover:border-primary hover:shadow-lg"
+              className="flex h-full flex-col items-center justify-center gap-3 rounded-xl border border-border bg-surface p-6 text-center shadow-sm transition hover:-translate-y-1 hover:border-primary hover:shadow-lg"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-3xl">{link.icon}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-5xl">{link.icon}</span>
                 {link.href === '/requests' && pendingCount > 0 && (
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
                     審査中 {pendingCount}
                   </span>
                 )}
               </div>
-              <span className="font-bold text-foreground">{link.title}</span>
+              <span className="text-lg font-bold text-foreground">{link.title}</span>
               <p className="text-sm text-muted">{link.description}</p>
             </Link>
           </li>
