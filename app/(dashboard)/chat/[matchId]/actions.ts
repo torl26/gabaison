@@ -4,11 +4,12 @@ import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { messageSchema } from '@/lib/validations/message';
 import { type ActionResult, ok, err } from '@/lib/actions/types';
+import type { MessageRow } from './get-chat';
 
 export async function sendMessageAction(
-  _prevState: ActionResult<void> | null,
+  _prevState: ActionResult<MessageRow> | null,
   formData: FormData
-): Promise<ActionResult<void>> {
+): Promise<ActionResult<MessageRow>> {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -26,15 +27,19 @@ export async function sendMessageAction(
 
   const supabase = await createClient();
 
-  const { error } = await supabase.from('messages').insert({
-    match_id: parsed.data.matchId,
-    sender_id: user.id,
-    content: parsed.data.content,
-  });
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({
+      match_id: parsed.data.matchId,
+      sender_id: user.id,
+      content: parsed.data.content,
+    })
+    .select('id, match_id, sender_id, content, created_at')
+    .single();
 
-  if (error) {
-    return err('送信に失敗しました: ' + error.message);
+  if (error || !data) {
+    return err('送信に失敗しました: ' + (error?.message ?? '不明なエラー'));
   }
 
-  return ok(undefined);
+  return ok(data as MessageRow);
 }

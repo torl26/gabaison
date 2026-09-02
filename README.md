@@ -83,3 +83,26 @@ Confirm emailのON/OFFに関わらずプロフィール作成自体は失敗し�
 を見ているため、実際のDB読み書きを検証するには本物のSupabaseログイン
 が必要です（このダミーユーザーはサインアップされたことがないため、
 対応する `profiles` 行は存在しません）。
+
+### 管理画面
+
+`/admin` 以下に、学生数・メンター数・マッチング申請の状況・総メッセージ数を見られる
+読み取り専用の管理画面があります。ユーザーの削除やモデレーション機能はありません。
+
+admin権限はアプリの画面からは付与できません。SQLで直接プロフィールのroleを
+書き換えてください。
+
+```sql
+begin;
+alter table public.profiles disable trigger profiles_prevent_role_change;
+update public.profiles set role = 'admin' where id = '<対象のprofiles.id>';
+alter table public.profiles enable trigger profiles_prevent_role_change;
+commit;
+```
+
+admin権限を付与すると、そのアカウントは管理画面に表示される集計値だけでなく、
+アプリの通常のSupabaseクライアント経由で全マッチング申請・全メッセージ本文にも
+RLS上読み取り可能になる点に注意してください。
+
+SQLで権限を変更してから改めてログインすると、ダッシュボードのナビゲーション右部に
+「管理者画面」へのリンクが表示されます。

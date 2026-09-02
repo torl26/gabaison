@@ -27,13 +27,15 @@ export default async function MentorsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-bold">メンターを探す</h1>
+      <h1 className="text-xl font-bold text-foreground">メンターを探す</h1>
 
       <nav className="flex flex-wrap gap-2">
         <Link
           href="/mentors"
-          className={`rounded-full border px-3 py-1 text-sm ${
-            !categoryFilter ? 'bg-black text-white' : ''
+          className={`rounded-full border px-3 py-1 text-sm transition ${
+            !categoryFilter
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border text-foreground hover:bg-surface'
           }`}
         >
           すべて
@@ -42,8 +44,10 @@ export default async function MentorsPage({
           <Link
             key={c.key}
             href={`/mentors?category=${c.key}`}
-            className={`rounded-full border px-3 py-1 text-sm ${
-              categoryFilter === c.key ? 'bg-black text-white' : ''
+            className={`rounded-full border px-3 py-1 text-sm transition ${
+              categoryFilter === c.key
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border text-foreground hover:bg-surface'
             }`}
           >
             {c.label}
@@ -52,22 +56,28 @@ export default async function MentorsPage({
       </nav>
 
       {mentors.length === 0 ? (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           該当するメンターが見つかりませんでした。
         </p>
       ) : (
         <ul className="flex flex-col gap-4">
           {mentors.map((mentor) => (
-            <li key={mentor.id} className="rounded border p-4">
-              <Link href={`/mentors/${mentor.id}`} className="font-bold underline">
+            <li
+              key={mentor.id}
+              className="rounded-xl border border-border bg-surface p-4 shadow-sm"
+            >
+              <Link
+                href={`/mentors/${mentor.id}`}
+                className="font-bold text-foreground underline"
+              >
                 {mentor.name}
               </Link>
-              <p className="mt-1 text-sm text-gray-600">{mentor.bio}</p>
+              <p className="mt-1 text-sm text-muted">{mentor.bio}</p>
               <div className="mt-2 flex flex-wrap gap-1">
                 {mentor.categories.map((c) => (
                   <span
                     key={c.key}
-                    className="rounded-full bg-gray-100 px-2 py-0.5 text-xs"
+                    className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
                   >
                     {c.label}
                   </span>

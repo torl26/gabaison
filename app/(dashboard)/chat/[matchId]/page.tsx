@@ -21,8 +21,8 @@ export default async function ChatPage({
   if (!context) {
     return (
       <div>
-        <h1 className="text-xl font-bold">チャット</h1>
-        <p className="mt-2 text-sm text-gray-500">見つかりません</p>
+        <h1 className="text-xl font-bold text-foreground">チャット</h1>
+        <p className="mt-2 text-sm text-muted">見つかりません</p>
       </div>
     );
   }
@@ -30,8 +30,8 @@ export default async function ChatPage({
   if (context.status !== 'accepted') {
     return (
       <div>
-        <h1 className="text-xl font-bold">チャット</h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <h1 className="text-xl font-bold text-foreground">チャット</h1>
+        <p className="mt-2 text-sm text-muted">
           このマッチングはまだ承認されていません
         </p>
       </div>
@@ -43,7 +43,7 @@ export default async function ChatPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold">{context.counterpartName}さんとのチャット</h1>
+      <h1 className="text-xl font-bold text-foreground">{context.counterpartName}さんとのチャット</h1>
       <ChatRoom
         matchId={matchId}
         initialMessages={chatMessages}

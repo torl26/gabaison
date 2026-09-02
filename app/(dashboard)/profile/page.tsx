@@ -20,7 +20,7 @@ export default async function ProfilePage() {
     .single<Profile>();
 
   if (!profile) {
-    return <p>プロフィールが見つかりませんでした。</p>;
+    return <p className="text-muted">プロフィールが見つかりませんでした。</p>;
   }
 
   const { data: categories } = await supabase
@@ -40,7 +40,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-bold">プロフィール</h1>
+      <h1 className="text-2xl font-bold text-foreground">プロフィール</h1>
       <ProfileForm
         profile={profile}
         categories={categories ?? []}
