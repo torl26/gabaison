@@ -21,7 +21,8 @@ export default async function RequestsPage() {
   }
 
   const supabase = await createClient();
-  const requests = await fetchMatchRequests(supabase, user.id);
+  const allRequests = await fetchMatchRequests(supabase, user.id);
+  const requests = allRequests.filter((request) => request.status !== 'cancelled');
 
   return (
     <div className="flex flex-col gap-6">
