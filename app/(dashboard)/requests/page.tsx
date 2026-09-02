@@ -4,11 +4,13 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
 import { fetchMatchRequests } from './get-requests';
 import { RequestActions } from './request-actions';
+import { RequestCancelAction } from './request-cancel-action';
 
 const STATUS_LABELS = {
   pending: '審査中',
   accepted: '承認済み',
   rejected: '却下',
+  cancelled: '取消済み',
 };
 
 export default async function RequestsPage() {
@@ -44,6 +46,12 @@ export default async function RequestsPage() {
               {request.isMentor && request.status === 'pending' && (
                 <div className="mt-3">
                   <RequestActions requestId={request.id} />
+                </div>
+              )}
+
+              {!request.isMentor && request.status === 'pending' && (
+                <div className="mt-3">
+                  <RequestCancelAction requestId={request.id} />
                 </div>
               )}
 
