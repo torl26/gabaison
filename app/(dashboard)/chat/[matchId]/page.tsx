@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
@@ -43,7 +44,12 @@ export default async function ChatPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold text-foreground">{context.counterpartName}さんとのチャット</h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-xl font-bold text-foreground">{context.counterpartName}さんとのチャット</h1>
+        <Link href={`/users/${context.counterpartId}`} className="text-sm text-primary underline">
+          プロフィール
+        </Link>
+      </div>
       <ChatRoom
         matchId={matchId}
         initialMessages={chatMessages}

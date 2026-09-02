@@ -31,24 +31,29 @@ export default async function ChatListPage() {
       ) : (
         <ul className="flex flex-col gap-3">
           {chats.map((chat) => (
-            <li key={chat.id}>
-              <Link
-                href={`/chat/${chat.id}`}
-                className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-sm transition hover:border-primary"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-bold text-foreground">{chat.counterpartName}</p>
-                    {unreadCounts[chat.id] > 0 && (
-                      <span className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                        {unreadCounts[chat.id]}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted">{chat.category.label}</p>
+            <li
+              key={chat.id}
+              className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-sm transition hover:border-primary"
+            >
+              <Link href={`/chat/${chat.id}`} className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="font-bold text-foreground">{chat.counterpartName}</p>
+                  {unreadCounts[chat.id] > 0 && (
+                    <span className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                      {unreadCounts[chat.id]}
+                    </span>
+                  )}
                 </div>
-                <span className="text-sm text-primary">開く</span>
+                <p className="text-sm text-muted">{chat.category.label}</p>
               </Link>
+              <div className="flex items-center gap-3">
+                <Link href={`/users/${chat.counterpartId}`} className="text-sm text-primary underline">
+                  プロフィール
+                </Link>
+                <Link href={`/chat/${chat.id}`} className="text-sm text-primary">
+                  開く
+                </Link>
+              </div>
             </li>
           ))}
         </ul>

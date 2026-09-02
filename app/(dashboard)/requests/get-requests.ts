@@ -28,6 +28,7 @@ export interface MatchRequestSummary {
   status: MatchRequestStatus;
   message: string | null;
   createdAt: string;
+  counterpartId: string;
   counterpartName: string;
   category: CategoryDefinition;
   isMentor: boolean;
@@ -53,6 +54,7 @@ export function buildMatchRequestSummaries(
       status: request.status,
       message: request.message,
       createdAt: request.created_at,
+      counterpartId,
       counterpartName: nameById.get(counterpartId) ?? '不明なユーザー',
       category: categoryById.get(request.category_id) ?? { key: 'career', label: '不明' },
       isMentor,

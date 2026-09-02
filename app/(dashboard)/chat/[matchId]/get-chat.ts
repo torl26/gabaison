@@ -40,6 +40,7 @@ export interface ChatContext {
   matchId: string;
   status: MatchRequestStatus;
   participantNames: Record<string, string>;
+  counterpartId: string;
   counterpartName: string;
 }
 
@@ -77,6 +78,7 @@ export async function fetchChatContext(
     matchId: matchRequest.id,
     status: matchRequest.status,
     participantNames,
+    counterpartId,
     counterpartName: participantNames[counterpartId] ?? '不明なユーザー',
   };
 }

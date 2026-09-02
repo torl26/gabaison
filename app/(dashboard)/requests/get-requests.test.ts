@@ -48,6 +48,18 @@ describe('buildMatchRequestSummaries', () => {
     expect(result[1].counterpartName).toBe('ジロウ');
   });
 
+  it('resolves the counterpart id (the other party, not the current user)', () => {
+    const result = buildMatchRequestSummaries(
+      requests,
+      profiles,
+      categories,
+      CURRENT_USER_ID
+    );
+
+    expect(result[0].counterpartId).toBe('mentor-1');
+    expect(result[1].counterpartId).toBe('student-2');
+  });
+
   it('marks whether the current user is the mentor on each request', () => {
     const result = buildMatchRequestSummaries(
       requests,
