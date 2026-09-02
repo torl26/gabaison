@@ -21,8 +21,8 @@ export default async function MentorDetailPage({
   if (!mentor) {
     return (
       <div>
-        <h1 className="text-xl font-bold">メンター詳細</h1>
-        <p className="mt-2 text-sm text-gray-500">メンターが見つかりません</p>
+        <h1 className="text-xl font-bold text-foreground">メンター詳細</h1>
+        <p className="mt-2 text-sm text-muted">メンターが見つかりません</p>
       </div>
     );
   }
@@ -30,13 +30,13 @@ export default async function MentorDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-bold">{mentor.name}</h1>
-        <p className="mt-1 text-sm text-gray-600">{mentor.bio}</p>
+        <h1 className="text-xl font-bold text-foreground">{mentor.name}</h1>
+        <p className="mt-1 text-sm text-muted">{mentor.bio}</p>
         <div className="mt-2 flex flex-wrap gap-1">
           {mentor.categories.map((category) => (
             <span
               key={category.key}
-              className="rounded-full bg-gray-100 px-2 py-0.5 text-xs"
+              className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
             >
               {category.label}
             </span>

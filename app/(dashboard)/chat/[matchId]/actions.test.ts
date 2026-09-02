@@ -1,9 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const { getCurrentUserMock, fromMock, insertMock } = vi.hoisted(() => ({
+const { getCurrentUserMock, fromMock, insertMock, selectMock, singleMock } = vi.hoisted(() => ({
   getCurrentUserMock: vi.fn(),
   fromMock: vi.fn(),
   insertMock: vi.fn(),
+  selectMock: vi.fn(),
+  singleMock: vi.fn(),
 }));
 
 vi.mock('@/lib/auth/get-current-user', () => ({
@@ -31,6 +33,8 @@ describe('sendMessageAction', () => {
     getCurrentUserMock.mockReset();
     fromMock.mockReset();
     insertMock.mockReset();
+    selectMock.mockReset();
+    singleMock.mockReset();
   });
 
   it('returns an error when nobody is logged in, without touching Supabase', async () => {
@@ -57,9 +61,18 @@ describe('sendMessageAction', () => {
     expect(fromMock).not.toHaveBeenCalled();
   });
 
-  it('inserts a message with the current user as sender', async () => {
+  it('inserts a message and returns the inserted row, so the sender does not have to wait for realtime', async () => {
     getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
-    insertMock.mockResolvedValue({ error: null });
+    const insertedRow = {
+      id: 'msg-1',
+      match_id: MATCH_ID,
+      sender_id: 'student-1',
+      content: 'こんにちは',
+      created_at: '2026-08-01T00:00:00Z',
+    };
+    singleMock.mockResolvedValue({ data: insertedRow, error: null });
+    selectMock.mockReturnValue({ single: singleMock });
+    insertMock.mockReturnValue({ select: selectMock });
     fromMock.mockReturnValue({ insert: insertMock });
 
     const result = await sendMessageAction(
@@ -73,12 +86,14 @@ describe('sendMessageAction', () => {
       sender_id: 'student-1',
       content: 'こんにちは',
     });
-    expect(result).toEqual({ success: true, data: undefined });
+    expect(result).toEqual({ success: true, data: insertedRow });
   });
 
   it('returns an error when the insert fails (e.g. not an accepted participant)', async () => {
     getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
-    insertMock.mockResolvedValue({ error: { message: 'boom' } });
+    singleMock.mockResolvedValue({ data: null, error: { message: 'boom' } });
+    selectMock.mockReturnValue({ single: singleMock });
+    insertMock.mockReturnValue({ select: selectMock });
     fromMock.mockReturnValue({ insert: insertMock });
 
     const result = await sendMessageAction(

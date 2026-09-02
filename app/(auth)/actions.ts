@@ -35,7 +35,7 @@ export async function signupAction(
     return err(error?.message ?? 'サインアップに失敗しました');
   }
 
-  redirect('/profile');
+  redirect('/home');
 }
 
 export async function loginAction(
@@ -58,7 +58,7 @@ export async function loginAction(
     return err('メールアドレスまたはパスワードが正しくありません');
   }
 
-  redirect('/profile');
+  redirect('/home');
 }
 
 export async function signOutAction(): Promise<void> {
