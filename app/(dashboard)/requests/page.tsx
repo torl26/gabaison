@@ -6,6 +6,7 @@ import { fetchMatchRequests } from './get-requests';
 import { RequestActions } from './request-actions';
 import { RequestCancelAction } from './request-cancel-action';
 import { STATUS_LABELS } from '@/lib/constants/match-request-status';
+import type { MatchRequestStatus } from '@/types/database';
 
 const STATUS_BADGE_STYLES = {
   pending: 'bg-amber-100 text-amber-700',
@@ -14,19 +15,61 @@ const STATUS_BADGE_STYLES = {
   cancelled: 'bg-stone-200 text-stone-500',
 };
 
-export default async function RequestsPage() {
+const STATUS_TABS: MatchRequestStatus[] = ['pending', 'accepted', 'rejected'];
+
+function isMatchRequestStatus(value: string | undefined): value is MatchRequestStatus {
+  return value === 'pending' || value === 'accepted' || value === 'rejected';
+}
+
+export default async function RequestsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
   const user = await getCurrentUser();
   if (!user) {
     redirect('/login');
   }
 
+  const { status } = await searchParams;
+  const statusFilter = isMatchRequestStatus(status) ? status : undefined;
+
   const supabase = await createClient();
   const allRequests = await fetchMatchRequests(supabase, user.id);
-  const requests = allRequests.filter((request) => request.status !== 'cancelled');
+  const requests = allRequests.filter(
+    (request) =>
+      request.status !== 'cancelled' && (!statusFilter || request.status === statusFilter)
+  );
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-xl font-bold text-foreground">マッチング申請</h1>
+
+      <nav className="flex flex-wrap gap-2">
+        <Link
+          href="/requests"
+          className={`rounded-full border px-3 py-1 text-sm transition ${
+            !statusFilter
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border text-foreground hover:bg-surface'
+          }`}
+        >
+          すべて
+        </Link>
+        {STATUS_TABS.map((s) => (
+          <Link
+            key={s}
+            href={`/requests?status=${s}`}
+            className={`rounded-full border px-3 py-1 text-sm transition ${
+              statusFilter === s
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border text-foreground hover:bg-surface'
+            }`}
+          >
+            {STATUS_LABELS[s]}
+          </Link>
+        ))}
+      </nav>
 
       {requests.length === 0 ? (
         <p className="text-sm text-muted">申請はまだありません。</p>
