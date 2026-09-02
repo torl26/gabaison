@@ -93,8 +93,10 @@ admin権限はアプリの画面からは付与できません。SQLで直接プ
 書き換えてください。
 
 ```sql
+alter table public.profiles disable trigger profiles_prevent_role_change;
 update public.profiles set role = 'admin' where id = '<対象のprofiles.id>';
+alter table public.profiles enable trigger profiles_prevent_role_change;
 ```
 
-SQLで権限を変更してから改めてログインすると、ダッシュボード左部のナビゲーションに
+SQLで権限を変更してから改めてログインすると、ダッシュボードのナビゲーション右部に
 「管理者画面」へのリンクが表示されます。
