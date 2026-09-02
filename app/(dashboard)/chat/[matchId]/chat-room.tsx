@@ -117,16 +117,20 @@ export function ChatRoom({
         {messages.map((message) => (
           <li
             key={message.id}
-            className={`max-w-md rounded-2xl p-3 text-sm ${
-              message.isOwn
-                ? 'ml-auto bg-primary text-primary-foreground'
-                : 'border border-border bg-surface text-foreground'
-            }`}
+            className={`flex items-end gap-1 ${message.isOwn ? 'ml-auto flex-row-reverse' : ''}`}
           >
-            <p className="text-xs opacity-70">{message.senderName}</p>
-            <p>{message.content}</p>
+            <div
+              className={`max-w-md rounded-2xl p-3 text-sm ${
+                message.isOwn
+                  ? 'bg-primary text-primary-foreground'
+                  : 'border border-border bg-surface text-foreground'
+              }`}
+            >
+              <p className="text-xs opacity-70">{message.senderName}</p>
+              <p>{message.content}</p>
+            </div>
             {message.isOwn && message.readAt && (
-              <p className="mt-1 text-right text-xs opacity-70">既読</p>
+              <span className="shrink-0 text-xs text-muted">既読</span>
             )}
           </li>
         ))}
