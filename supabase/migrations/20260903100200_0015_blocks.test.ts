@@ -34,7 +34,7 @@ describe('20260903100200_0015_blocks.sql', () => {
 
   it('hides a blocked counterpart from profiles select, unless admin or self', () => {
     expect(sql).toContain('drop policy "profiles_select_authenticated" on public.profiles');
-    expect(sql).toContain('or public.is_admin()');
+    expect(sql).toContain('or (select public.is_admin())');
     expect(sql).toContain('or not public.is_blocked(id, (select auth.uid()))');
   });
 

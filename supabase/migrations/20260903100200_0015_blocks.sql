@@ -66,7 +66,7 @@ create policy "profiles_select_authenticated" on public.profiles
   for select to authenticated
   using (
     id = (select auth.uid())
-    or public.is_admin()
+    or (select public.is_admin())
     or not public.is_blocked(id, (select auth.uid()))
   );
 
