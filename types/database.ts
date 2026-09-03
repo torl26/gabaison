@@ -6,6 +6,17 @@ export interface Profile {
   name: string;
   bio: string;
   avatar_url: string | null;
+  headline: string;
+  affiliation: string;
+  title: string;
+  experience_years: number | null;
+  availability: string;
+  accepting: boolean;
+  skills: string[];
+  topics: string[];
+  github_url: string | null;
+  x_url: string | null;
+  website_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -21,7 +32,12 @@ export interface MentorCategory {
   category_id: number;
 }
 
-export type MatchRequestStatus = 'pending' | 'accepted' | 'rejected' | 'cancelled';
+export type MatchRequestStatus =
+  | 'pending'
+  | 'accepted'
+  | 'rejected'
+  | 'cancelled'
+  | 'completed';
 
 export interface MatchRequest {
   id: string;
@@ -39,5 +55,15 @@ export interface Message {
   match_id: string;
   sender_id: string;
   content: string;
+  created_at: string;
+}
+
+export interface Review {
+  id: string;
+  match_id: string;
+  reviewer_id: string;
+  reviewee_id: string;
+  rating: number;
+  comment: string;
   created_at: string;
 }

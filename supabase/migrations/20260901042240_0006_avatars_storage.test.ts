@@ -3,11 +3,11 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(import.meta.dirname, '0006_avatars_storage.sql'),
+  path.join(import.meta.dirname, '20260901042240_0006_avatars_storage.sql'),
   'utf-8'
 ).toLowerCase();
 
-describe('0006_avatars_storage.sql', () => {
+describe('20260901042240_0006_avatars_storage.sql', () => {
   it('creates a public avatars bucket', () => {
     expect(sql).toContain("insert into storage.buckets (id, name, public)");
     expect(sql).toContain("values ('avatars', 'avatars', true)");

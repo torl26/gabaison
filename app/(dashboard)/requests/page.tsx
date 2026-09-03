@@ -5,6 +5,9 @@ import { createClient } from '@/lib/supabase/server';
 import { fetchMatchRequests } from './get-requests';
 import { RequestActions } from './request-actions';
 import { RequestCancelAction } from './request-cancel-action';
+import { RequestCompleteAction } from './request-complete-action';
+import { ReviewForm } from './review-form';
+import { fetchReviewedMatchIds } from '@/lib/reviews/get-reviews';
 import { STATUS_LABELS } from '@/lib/constants/match-request-status';
 import type { MatchRequestStatus } from '@/types/database';
 
@@ -13,12 +16,13 @@ const STATUS_BADGE_STYLES = {
   accepted: 'bg-green-100 text-green-700',
   rejected: 'bg-stone-200 text-stone-600',
   cancelled: 'bg-stone-200 text-stone-500',
+  completed: 'bg-primary/10 text-primary',
 };
 
-const STATUS_TABS: MatchRequestStatus[] = ['pending', 'accepted', 'rejected'];
+const STATUS_TABS: MatchRequestStatus[] = ['pending', 'accepted', 'completed', 'rejected'];
 
 function isMatchRequestStatus(value: string | undefined): value is MatchRequestStatus {
-  return value === 'pending' || value === 'accepted' || value === 'rejected';
+  return STATUS_TABS.includes(value as MatchRequestStatus);
 }
 
 export default async function RequestsPage({
@@ -35,7 +39,10 @@ export default async function RequestsPage({
   const statusFilter = isMatchRequestStatus(status) ? status : undefined;
 
   const supabase = await createClient();
-  const allRequests = await fetchMatchRequests(supabase, user.id);
+  const [allRequests, reviewedMatchIds] = await Promise.all([
+    fetchMatchRequests(supabase, user.id),
+    fetchReviewedMatchIds(supabase, user.id),
+  ]);
   const requests = allRequests.filter(
     (request) =>
       request.status !== 'cancelled' && (!statusFilter || request.status === statusFilter)
@@ -122,13 +129,27 @@ export default async function RequestsPage({
               )}
 
               {request.status === 'accepted' && (
-                <Link
-                  href={`/chat/${request.id}`}
-                  className="mt-3 inline-block text-sm text-primary underline"
-                >
-                  チャットへ
-                </Link>
+                <div className="mt-3 flex flex-col gap-3">
+                  <Link
+                    href={`/chat/${request.id}`}
+                    className="text-sm text-primary underline"
+                  >
+                    チャットへ
+                  </Link>
+                  <RequestCompleteAction requestId={request.id} />
+                </div>
               )}
+
+              {request.status === 'completed' &&
+                !request.isMentor &&
+                !reviewedMatchIds.has(request.id) && (
+                  <div className="mt-3">
+                    <ReviewForm
+                      requestId={request.id}
+                      mentorName={request.counterpartName}
+                    />
+                  </div>
+                )}
             </li>
           ))}
         </ul>

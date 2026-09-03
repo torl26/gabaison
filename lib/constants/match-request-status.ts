@@ -5,4 +5,5 @@ export const STATUS_LABELS: Record<MatchRequestStatus, string> = {
   accepted: '承認済み',
   rejected: '却下',
   cancelled: '取り消し済み',
+  completed: '完了',
 };

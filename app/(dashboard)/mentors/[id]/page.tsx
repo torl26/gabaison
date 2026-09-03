@@ -1,7 +1,11 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
+import { fetchMentorStats } from '@/lib/profile/get-profile-stats';
+import { fetchReviewsFor } from '@/lib/reviews/get-reviews';
 import { fetchMentorById } from '../get-mentors';
+import { AcceptingBadge, MentorStatsRow, ProfileDetails } from '../../profile/profile-details';
+import { RatingSummary, ReviewsSection } from '../../profile/reviews-section';
 import { MatchRequestForm } from './match-request-form';
 
 export default async function MentorDetailPage({
@@ -27,9 +31,14 @@ export default async function MentorDetailPage({
     );
   }
 
+  const [stats, { stats: reviewStats, reviews }] = await Promise.all([
+    fetchMentorStats(supabase, mentor.id),
+    fetchReviewsFor(supabase, mentor.id),
+  ]);
+
   return (
     <div className="flex flex-col gap-6">
-      <div>
+      <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
           {mentor.avatarUrl && (
             // eslint-disable-next-line @next/next/no-img-element
@@ -39,22 +48,27 @@ export default async function MentorDetailPage({
               className="h-12 w-12 rounded-full border border-border object-cover"
             />
           )}
-          <h1 className="text-xl font-bold text-foreground">{mentor.name}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-bold text-foreground">{mentor.name}</h1>
+            <AcceptingBadge accepting={mentor.accepting} />
+            <RatingSummary stats={reviewStats} />
+          </div>
         </div>
-        <p className="mt-1 text-sm text-muted">{mentor.bio}</p>
-        <div className="mt-2 flex flex-wrap gap-1">
-          {mentor.categories.map((category) => (
-            <span
-              key={category.key}
-              className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
-            >
-              {category.label}
-            </span>
-          ))}
-        </div>
+        {mentor.headline && <p className="text-sm font-bold text-foreground">{mentor.headline}</p>}
+        <MentorStatsRow stats={stats} />
       </div>
 
-      <MatchRequestForm mentorId={mentor.id} categories={mentor.categories} />
+      <ProfileDetails profile={mentor} />
+
+      <ReviewsSection stats={reviewStats} reviews={reviews} />
+
+      {mentor.accepting ? (
+        <MatchRequestForm mentorId={mentor.id} categories={mentor.categories} />
+      ) : (
+        <p className="rounded-xl border border-border bg-surface p-4 text-sm text-muted">
+          このメンターは現在、新しい申請を受け付けていません。
+        </p>
+      )}
     </div>
   );
 }

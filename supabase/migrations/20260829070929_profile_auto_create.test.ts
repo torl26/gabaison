@@ -3,11 +3,11 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(import.meta.dirname, '0002_profile_auto_create.sql'),
+  path.join(import.meta.dirname, '20260829070929_profile_auto_create.sql'),
   'utf-8'
 ).toLowerCase();
 
-describe('0002_profile_auto_create.sql', () => {
+describe('20260829070929_profile_auto_create.sql', () => {
   it('creates a trigger on auth.users that runs handle_new_user', () => {
     expect(sql).toContain('after insert on auth.users');
     expect(sql).toContain('execute function public.handle_new_user()');
