@@ -13,7 +13,9 @@ export default async function ChatListPage() {
 
   const supabase = await createClient();
   const requests = await fetchMatchRequests(supabase, user.id);
-  const chats = requests.filter((request) => request.status === 'accepted');
+  const chats = requests.filter(
+    (request) => request.status === 'accepted' || request.status === 'completed'
+  );
   const unreadCounts = await fetchUnreadCounts(
     supabase,
     user.id,
@@ -53,7 +55,10 @@ export default async function ChatListPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-muted">{chat.category.label}</p>
+                  <p className="text-sm text-muted">
+                    {chat.category.label}
+                    {chat.status === 'completed' && ' ・ 相談完了'}
+                  </p>
                 </div>
               </Link>
               <div className="flex items-center gap-3">

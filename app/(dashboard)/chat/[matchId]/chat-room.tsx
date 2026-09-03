@@ -10,6 +10,7 @@ type Props = {
   initialMessages: ChatMessage[];
   participantNames: Record<string, string>;
   currentUserId: string;
+  readOnly?: boolean;
 };
 
 export function ChatRoom({
@@ -17,6 +18,7 @@ export function ChatRoom({
   initialMessages,
   participantNames,
   currentUserId,
+  readOnly = false,
 }: Props) {
   const [messages, setMessages] = useState(initialMessages);
   const [state, formAction, pending] = useActionState(sendMessageAction, null);
@@ -138,23 +140,29 @@ export function ChatRoom({
         ))}
       </ul>
 
-      <form action={formAction} className="flex gap-2">
-        <input type="hidden" name="matchId" value={matchId} />
-        <input
-          type="text"
-          name="content"
-          required
-          className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-          placeholder="メッセージを入力"
-        />
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-primary px-4 py-2 text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
-        >
-          送信
-        </button>
-      </form>
+      {readOnly ? (
+        <p className="rounded-2xl bg-[#f5c45b]/20 px-4 py-3 text-sm leading-6 text-[#17263d]/65">
+          この相談は完了しています。チャット履歴はいつでも確認できます。
+        </p>
+      ) : (
+        <form action={formAction} className="flex gap-2">
+          <input type="hidden" name="matchId" value={matchId} />
+          <input
+            type="text"
+            name="content"
+            required
+            className="flex-1 rounded-2xl border border-[#17263d]/12 bg-[#fffaf3] px-4 py-3 text-foreground focus:outline-none focus:ring-4 focus:ring-[#e16f4d]/10"
+            placeholder="メッセージを入力"
+          />
+          <button
+            type="submit"
+            disabled={pending}
+            className="rounded-full bg-[#e16f4d] px-5 py-3 font-bold text-[#fff8ed] transition hover:-translate-y-0.5 hover:bg-[#cf5f40] disabled:opacity-50"
+          >
+            送信
+          </button>
+        </form>
+      )}
       {state && !state.success && (
         <p className="text-sm text-red-600">{state.error}</p>
       )}
