@@ -3,11 +3,11 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(import.meta.dirname, '20260904090000_0018_badges.sql'),
+  path.join(import.meta.dirname, '20260904090000_0019_badges.sql'),
   'utf-8'
 ).toLowerCase();
 
-describe('20260904090000_0018_badges.sql', () => {
+describe('20260904090000_0019_badges.sql', () => {
   it('creates badge_definitions with a source check and a threshold-only-for-match_count constraint', () => {
     expect(sql).toContain('create table public.badge_definitions');
     expect(sql).toContain("source in ('manual', 'match_count')");
