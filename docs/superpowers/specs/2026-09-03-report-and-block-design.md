@@ -151,6 +151,32 @@ create policy "profiles_select_authenticated" on public.profiles
 新しい「ブロックされているので非表示」という専用UIは作らず、既存の
 not-found 分岐をそのまま利用する。
 
+**注意:** この `profiles` 閲覧制限は双方向に働くため、ブロックした本人から見ても
+ブロック相手の `profiles` 行は SELECT できなくなる。そのままでは 4.2 の
+「ブロック中ユーザー一覧」で相手の名前・アバターを表示できない。そのため、
+一覧表示専用に RLS を迂回する `SECURITY DEFINER` 関数を用意する:
+
+```sql
+create or replace function public.get_blocked_profiles()
+returns table (id uuid, name text, avatar_url text, blocked_at timestamptz)
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select p.id, p.name, p.avatar_url, b.created_at as blocked_at
+  from public.blocks b
+  join public.profiles p on p.id = b.blocked_id
+  where b.blocker_id = (select auth.uid())
+  order by b.created_at desc;
+$$;
+```
+
+`is_admin()` と同じ考え方で、「呼び出した本人が自分でブロックした相手」という
+狭い範囲に限定して RLS を迂回するため安全である。4.2 の一覧画面はこの関数を
+`supabase.rpc('get_blocked_profiles')` で呼び出して取得する（`profiles` テーブルへの
+直接 SELECT は使わない）。
+
 ### 3.4 マッチング申請のブロック
 
 `match_requests_insert_student` の `with check` にブロック判定を追加する:
@@ -243,8 +269,9 @@ if new.status is distinct from old.status then
 
 `/profile` 画面に「ブロック中のユーザー」へのリンクを追加する（「編集する」
 ボタンの近く）。新規ページで、自分がブロックした相手の一覧
-（名前・アバター・ブロック日時）と「解除」ボタンを表示する。解除は
-`blocks` 行の delete。
+（名前・アバター・ブロック日時）と「解除」ボタンを表示する。一覧の取得は
+3.3 で追加した `get_blocked_profiles()` RPC を使う（`profiles` への直接 SELECT では
+ブロック相手の行が見えないため）。解除は `blocks` 行の delete。
 
 ### 4.3 管理者向け通報一覧（新規: `/admin/reports`）
 
