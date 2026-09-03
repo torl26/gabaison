@@ -30,3 +30,17 @@ export async function fetchUnreadCounts(
 
   return countUnreadByMatch((data ?? []) as UnreadRow[]);
 }
+
+export async function hasUnreadMessages(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('messages')
+    .select('id')
+    .neq('sender_id', userId)
+    .is('read_at', null)
+    .limit(1);
+
+  return (data?.length ?? 0) > 0;
+}
