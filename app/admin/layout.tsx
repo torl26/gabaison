@@ -5,6 +5,7 @@ const ADMIN_NAV_ITEMS = [
   { href: '/admin', label: '概要' },
   { href: '/admin/users', label: 'ユーザー一覧' },
   { href: '/admin/reports', label: '通報一覧' },
+  { href: '/admin/badges', label: 'バッジ管理' },
 ];
 
 export default async function AdminLayout({
