@@ -6,7 +6,8 @@ import { fetchUserProfile } from '@/lib/profile/get-user-profile';
 import { calculateCompleteness } from '@/lib/profile/completeness';
 import { fetchMentorStats } from '@/lib/profile/get-profile-stats';
 import { ROLE_LABELS } from '@/lib/constants/roles';
-import { AcceptingBadge, MentorStatsRow, ProfileDetails } from './profile-details';
+import { fetchUserBadges } from '@/lib/badges/get-user-badges';
+import { AcceptingBadge, BadgeList, MentorStatsRow, ProfileDetails } from './profile-details';
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -24,6 +25,7 @@ export default async function ProfilePage() {
 
   const completeness = calculateCompleteness(profile);
   const stats = profile.role === 'mentor' ? await fetchMentorStats(supabase, user.id) : null;
+  const badges = await fetchUserBadges(supabase, user.id);
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6 p-6">
@@ -49,6 +51,8 @@ export default async function ProfilePage() {
           )}
         </div>
       </div>
+
+      <BadgeList badges={badges} />
 
       <section className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-4 shadow-sm">
         <div className="flex items-center justify-between">

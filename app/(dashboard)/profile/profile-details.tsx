@@ -1,6 +1,7 @@
 import type { UserProfileView } from '@/lib/profile/get-user-profile';
 import type { MentorStats } from '@/lib/profile/get-profile-stats';
 import { formatResponseTime } from '@/lib/profile/get-profile-stats';
+import type { UserBadgeView } from '@/lib/badges/get-user-badges';
 
 export function SkillTags({ skills }: { skills: string[] }) {
   if (skills.length === 0) {
@@ -28,6 +29,26 @@ export function AcceptingBadge({ accepting }: { accepting: boolean }) {
     </span>
   ) : (
     <span className="rounded-full bg-surface px-2 py-0.5 text-xs text-muted">現在停止中</span>
+  );
+}
+
+export function BadgeList({ badges }: { badges: UserBadgeView[] }) {
+  if (badges.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {badges.map((badge) => (
+        <span
+          key={badge.id}
+          className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-foreground"
+        >
+          <span aria-hidden="true">{badge.icon}</span>
+          {badge.label}
+        </span>
+      ))}
+    </div>
   );
 }
 

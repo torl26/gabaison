@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import { fetchUserProfile } from '@/lib/profile/get-user-profile';
 import { ROLE_LABELS } from '@/lib/constants/roles';
 import { fetchReviewsFor } from '@/lib/reviews/get-reviews';
-import { AcceptingBadge, ProfileDetails } from '../../profile/profile-details';
+import { fetchUserBadges } from '@/lib/badges/get-user-badges';
+import { AcceptingBadge, BadgeList, ProfileDetails } from '../../profile/profile-details';
 import { RatingSummary, ReviewsSection } from '../../profile/reviews-section';
 import { BlockButton } from '../../profile/block-button';
 import { ReportButton } from '../../profile/report-button';
@@ -23,6 +24,7 @@ export default async function UserProfilePage({
   const supabase = await createClient();
   const profile = await fetchUserProfile(supabase, id);
   const { stats: reviewStats, reviews } = await fetchReviewsFor(supabase, id);
+  const badges = await fetchUserBadges(supabase, id);
 
   if (!profile) {
     return (
@@ -65,6 +67,8 @@ export default async function UserProfilePage({
           )}
         </div>
       </div>
+
+      <BadgeList badges={badges} />
 
       <ProfileDetails profile={profile} />
 
