@@ -28,7 +28,7 @@ export default async function ChatPage({
     );
   }
 
-  if (context.status !== 'accepted') {
+  if (context.status !== 'accepted' && context.status !== 'completed') {
     return (
       <div>
         <h1 className="text-xl font-bold text-foreground">チャット</h1>
@@ -65,6 +65,7 @@ export default async function ChatPage({
         initialMessages={chatMessages}
         participantNames={context.participantNames}
         currentUserId={user.id}
+        readOnly={context.status === 'completed'}
       />
     </div>
   );
