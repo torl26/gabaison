@@ -3,11 +3,11 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(import.meta.dirname, '0013_blocks.sql'),
+  path.join(import.meta.dirname, '20260903100200_0015_blocks.sql'),
   'utf-8'
 ).toLowerCase();
 
-describe('0013_blocks.sql', () => {
+describe('20260903100200_0015_blocks.sql', () => {
   it('creates the blocks table with a self-block check', () => {
     expect(sql).toContain('create table public.blocks');
     expect(sql).toContain('constraint blocks_not_self check (blocker_id <> blocked_id)');
