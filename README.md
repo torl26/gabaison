@@ -1,108 +1,198 @@
-# 学生-メンター マッチングアプリ
+# TechTies
 
-設計書: [docs/superpowers/specs/2026-08-26-mentor-matching-design.md](docs/superpowers/specs/2026-08-26-mentor-matching-design.md)
+**TechTies** は、学生とメンターをつなぎ、ひとりで抱え込まずに次の一歩を考えるためのマッチングアプリです。学生は相談したいテーマに合うメンターを探し、メンターは自分の経験を必要としている学生とつながれます。
+
+## プロダクトの特徴
+
+- 学生・メンターの役割を選べるアカウント登録
+- カテゴリからメンターを探せる検索画面
+- メンターのプロフィール、経験、対応カテゴリの確認
+- 相談メッセージ付きのマッチング申請
+- 申請の承認・拒否・キャンセル・完了管理
+- マッチング成立後のリアルタイムチャット
+- プロフィール編集、アバター画像、プロフィール完成度の表示
+- 完了したマッチングへのレビュー
+- ユーザーのブロック・通報機能
+- 管理者向けの利用状況集計・通報確認画面
+
+## 画面一覧
+
+| 画面 | URL | 内容 |
+|---|---|---|
+| 紹介ページ | `/` | TechTiesのコンセプト紹介。未ログイン時の入口 |
+| ログイン | `/login` | メールアドレスとパスワードでログイン |
+| 新規登録 | `/signup` | 学生またはメンターとして登録 |
+| ホーム | `/home` | お知らせ、主要導線、イベント情報 |
+| メンター検索 | `/mentors` | カテゴリ別のメンター検索 |
+| メンター詳細 | `/mentors/[id]` | プロフィール確認とマッチング申請 |
+| 申請一覧 | `/requests` | 送受信したマッチング申請の管理 |
+| チャット一覧 | `/chat` | 承認済みマッチングの一覧 |
+| チャットルーム | `/chat/[matchId]` | マッチング相手とのメッセージ交換 |
+| プロフィール | `/profile` | 自分のプロフィールと完成度の確認 |
+| プロフィール編集 | `/profile/edit` | プロフィール情報の編集 |
+| ブロック一覧 | `/profile/blocked` | ブロック中ユーザーの管理 |
+| ユーザー詳細 | `/users/[id]` | 他ユーザーの公開プロフィール |
+| 管理者画面 | `/admin` | 利用状況の集計 |
+| 通報管理 | `/admin/reports` | 通報内容の確認 |
+| ユーザー管理 | `/admin/users` | ユーザー情報の確認 |
+
+## 技術スタック
+
+- **Next.js 16** / App Router
+- **React 19** / TypeScript
+- **Tailwind CSS 4**
+- **Supabase**（Authentication、Postgres、Storage、Realtime）
+- **Zod**（入力バリデーション）
+- **Vitest**（テスト）
+- **Vercel**（デプロイ想定）
+
+認証・データ操作は、Next.jsのServer ComponentsとServer Actionsを中心に実装しています。データベースのアクセス制御にはSupabaseのRLS（Row Level Security）を使用しています。
 
 ## セットアップ
 
+### 必要な環境
+
+- Node.js 20以上
+- npm
+- Supabaseプロジェクト
+
+### インストール
+
 ```bash
+git clone https://github.com/torl26/gabaison.git
+cd gabaison
 npm install
 cp .env.local.example .env.local
-# .env.local に Supabase プロジェクトの URL / anon key を設定する
+```
+
+`.env.local` にSupabaseの接続情報を設定します。
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SKIP_AUTH=false
+```
+
+### データベースの準備
+
+Supabase CLIを利用する場合は、マイグレーションを適用します。
+
+```bash
+supabase link --project-ref <project-ref>
+supabase db push
+```
+
+Supabase CLIを使わない場合は、`supabase/migrations/` 内のSQLをファイル名の時系列順にSupabase SQL Editorで実行してください。マイグレーションには、プロフィール自動作成、RLS、アバター画像、Realtime、レビュー、ブロック、通報、管理者権限などの設定が含まれています。
+
+### 開発サーバー
+
+```bash
 npm run dev
 ```
 
-Supabaseプロジェクトを作成したら、`supabase/migrations/20260829070142_init.sql` を
-SupabaseのSQL Editor（または `supabase db push`）で適用してください。
+ブラウザで [http://localhost:3000](http://localhost:3000) を開きます。
 
-## テスト
+## 環境変数
+
+| 変数 | 必須 | 説明 |
+|---|---:|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | 必須 | SupabaseプロジェクトURL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 必須 | Supabaseの公開anon key |
+| `SKIP_AUTH` | 任意 | 開発時のみ利用する認証スキップ設定。通常は`false` |
+
+`SKIP_AUTH=true` の場合、実際のSupabaseセッションがないときに限り、UI確認用の固定ダミーユーザーが使われます。本番環境ではこの設定は無視され、実際の認証が使われます。RLSを含む実データの検証には、Supabaseで作成した実ユーザーを使用してください。
+
+## コマンド
 
 ```bash
-npm test          # Zodバリデーションスキーマの単体テスト（vitest）
-npx tsc --noEmit   # 型チェック
-npm run build      # ビルド確認
+npm run dev       # 開発サーバーを起動
+npm run build     # 本番ビルド
+npm run start     # 本番ビルドを起動
+npm run lint      # ESLint
+npm test          # Vitestテスト
 ```
 
-## ディレクトリ構成
+## メール確認の設定
 
-- `lib/supabase/` — Supabaseクライアント（`client.ts`=ブラウザ用, `server.ts`=Server Components/Actions用）
-- `lib/validations/` — Zodバリデーションスキーマ（Server Actionsの冒頭で使用）
-- `lib/actions/types.ts` — Server Actionsの共通戻り値型 `ActionResult`
-- `lib/constants/categories.ts` — 固定4カテゴリの定義
-- `types/database.ts` — DBテーブルに対応する型
-- `supabase/migrations/` — DBスキーマ・RLSポリシー
+開発中にサインアップを繰り返し確認する場合は、Supabase Dashboardの **Authentication → Sign In / Providers → Email** で **Confirm email** を一時的にOFFにすると確認しやすくなります。本番リリース前には、セキュリティとメールアドレスの所有確認のため、必ずONに戻してください。
 
-## 画面の分担
+新規ユーザーの`profiles`レコードは、`handle_new_user`トリガーによって`auth.users`への登録時に自動作成されます。
 
-ログイン・新規登録・ログアウトは実装済みです（`app/(auth)/actions.ts`）。
-残り5画面はNext.js App Routerのroute groupで骨組み（空のpage.tsx）だけが
-用意されているので、担当が決まったらそのpage.tsxとそこから呼ぶ
-Server Actionsを実装してください。
+## 管理者機能
 
-| 画面 | ルート | ファイル | 状態 |
-|---|---|---|---|
-| ログイン | `/login` | `app/(auth)/login/page.tsx` | 実装済み |
-| 新規登録 | `/signup` | `app/(auth)/signup/page.tsx` | 実装済み |
-| プロフィール | `/profile` | `app/(dashboard)/profile/page.tsx` | 未着手 |
-| メンター検索 | `/mentors` | `app/(dashboard)/mentors/page.tsx` | 未着手 |
-| メンター詳細・申請 | `/mentors/[id]` | `app/(dashboard)/mentors/[id]/page.tsx` | 未着手 |
-| マッチング申請一覧・承認 | `/requests` | `app/(dashboard)/requests/page.tsx` | 未着手 |
-| チャット | `/chat/[matchId]` | `app/(dashboard)/chat/[matchId]/page.tsx` | 未着手 |
+管理者画面では、学生数、メンター数、マッチング申請、メッセージ数などの集計を確認できます。また、通報内容とユーザー情報を確認できます。
 
-Server Actionsは各画面のファイル内（または同じディレクトリの `actions.ts`、
-`app/(auth)/actions.ts` が実例）に追加し、`lib/validations/` のスキーマで
-検証したうえで `lib/actions/types.ts` の `ok()` / `err()` を使って結果を
-返してください。ログイン中のユーザーは `supabase.auth.getUser()` を直接
-呼ぶ代わりに `lib/auth/get-current-user.ts` の `getCurrentUser()` を使って
-取得してください。
-
-**注意:** Supabaseプロジェクトが未作成のため、認証フローはコード上は
-完成していますが実際にサインアップ/ログインしての動作確認はまだ
-できていません。プロジェクトを作成して `.env.local` を設定したら、
-最初に動作確認をお願いします。
-
-### Supabaseのメール確認について
-
-開発中はSupabaseダッシュボードの Authentication → Sign In / Providers → Email
-で **Confirm email** をOFFにしています。ONのままだとサインアップのたびに
-確認メールを送ろうとしてSupabaseのレート制限(`over_email_send_rate_limit`)
-にすぐ引っかかり、検証がしづらいためです。**本番リリース前には必ずONに
-戻してください。**
-
-新規ユーザーの `profiles` 行は `supabase/migrations/20260829070929_profile_auto_create.sql`
-のトリガー(`handle_new_user`)が `auth.users` へのINSERT時に自動作成するので、
-Confirm emailのON/OFFに関わらずプロフィール作成自体は失敗しません。
-
-### 開発中にログインをスキップする
-
-`.env.local` で `SKIP_AUTH=true` にすると、`getCurrentUser()` は
-まず実際のSupabaseセッションを確認し、本物のログインがあれば常に
-それを優先します。ログインしていない場合に限り、固定のダミー
-ユーザーを返します（本番環境では無視され、常に実際のSupabase認証を
-使います）。ログイン状態を前提とした画面のUIを作るだけならダミー
-ユーザーで十分ですが、`profiles` などのテーブルはRLSで `auth.uid()`
-を見ているため、実際のDB読み書きを検証するには本物のSupabaseログイン
-が必要です（このダミーユーザーはサインアップされたことがないため、
-対応する `profiles` 行は存在しません）。
-
-### 管理画面
-
-`/admin` 以下に、学生数・メンター数・マッチング申請の状況・総メッセージ数を見られる
-読み取り専用の管理画面があります。ユーザーの削除やモデレーション機能はありません。
-
-admin権限はアプリの画面からは付与できません。SQLで直接プロフィールのroleを
-書き換えてください。
+管理者権限はアプリ画面から付与できません。必要な場合は、権限を付与する対象を確認したうえで、Supabase SQL Editorから設定してください。既存の権限変更用トリガーを無効化する必要がある構成のため、本番運用では作業者・対象ユーザー・実行時刻を記録し、作業後に必ずトリガーを有効化してください。
 
 ```sql
 begin;
 alter table public.profiles disable trigger profiles_prevent_role_change;
-update public.profiles set role = 'admin' where id = '<対象のprofiles.id>';
+update public.profiles
+set role = 'admin'
+where id = '<対象のprofiles.id>';
 alter table public.profiles enable trigger profiles_prevent_role_change;
 commit;
 ```
 
-admin権限を付与すると、そのアカウントは管理画面に表示される集計値だけでなく、
-アプリの通常のSupabaseクライアント経由で全マッチング申請・全メッセージ本文にも
-RLS上読み取り可能になる点に注意してください。
+管理者権限を持つアカウントは、集計画面だけでなく、通常のSupabaseクライアント経由で広い範囲のマッチング申請・メッセージ情報を読み取れる可能性があります。必要最小限のユーザーにのみ付与してください。
 
-SQLで権限を変更してから改めてログインすると、ダッシュボードのナビゲーション右部に
-「管理者画面」へのリンクが表示されます。
+## ディレクトリ構成
+
+```text
+app/
+  (auth)/              # ログイン・新規登録・認証Server Actions
+  (dashboard)/         # ログイン後のホーム、検索、申請、チャット、プロフィール
+  admin/               # 管理者画面
+  intro/               # 紹介ページ関連のルート
+  layout.tsx           # アプリ共通レイアウト・フォント
+  globals.css          # 共通デザイントークン
+lib/
+  auth/                # 現在ユーザー・権限取得
+  constants/           # カテゴリ、ロール、ステータスなどの定数
+  profile/             # プロフィール取得・完成度・統計
+  reviews/             # レビュー関連処理
+  supabase/            # ブラウザ用・サーバー用Supabaseクライアント
+  validations/         # Zodバリデーション
+supabase/
+  migrations/          # DBスキーマ、RLS、Storage、Realtime設定
+  tests/               # DB関連テスト（構成に応じて配置）
+types/
+  database.ts          # データベース型定義
+```
+
+## 実装ルール
+
+- ログイン中のユーザー取得には`getCurrentUser()`を使用する
+- Server Actionsの入力は`lib/validations/`のZodスキーマで検証する
+- Server Actionsの戻り値は`ok()`または`err()`を使う
+- SupabaseのRLSポリシーを迂回するクライアント処理を追加しない
+- 認証情報やサービスロールキーをクライアントコードに含めない
+- 既存のマイグレーションを直接書き換えず、新しい変更は新規マイグレーションとして追加する
+
+## デプロイ
+
+VercelでGitHubリポジトリをImportし、Framework PresetにNext.jsを選択します。VercelのProject Settings → Environment Variablesに、少なくとも次の2つを登録してください。
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+本番環境では`SKIP_AUTH=false`または未設定にし、SupabaseのAuthentication URL Configurationに本番URLを追加してください。デプロイ前に次のコマンドでビルドを確認します。
+
+```bash
+npm ci
+npm run lint
+npm test
+npm run build
+```
+
+GitHubのPull Requestを作成すると、Vercel Previewで本番反映前の画面とビルド結果を確認できます。
+
+## 設計資料
+
+詳細な初期設計は、以下を参照してください。
+
+- [メンター・マッチング設計書](docs/superpowers/specs/2026-08-26-mentor-matching-design.md)
+
+## ライセンス
+
+このリポジトリのライセンスは、プロジェクトの運用方針に従います。
