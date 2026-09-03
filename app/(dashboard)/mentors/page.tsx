@@ -27,8 +27,8 @@ export default async function MentorsPage({
   const mentors = await fetchMentors(supabase, categoryFilter);
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-bold text-foreground">メンターを探す</h1>
+    <div className="flex flex-col gap-8">
+      <h1 className="text-2xl font-extrabold tracking-[-0.05em] text-[#17263d]">メンターを探す</h1>
 
       <nav className="flex flex-wrap gap-2">
         <Link
@@ -65,7 +65,7 @@ export default async function MentorsPage({
           {mentors.map((mentor) => (
             <li
               key={mentor.id}
-              className="rounded-xl border border-border bg-surface p-4 shadow-sm"
+              className="rounded-[1.4rem] border border-[#17263d]/10 bg-[#fffaf3] p-5 shadow-[0_18px_40px_-30px_rgba(23,38,61,0.5)]"
             >
               <div className="flex items-center gap-3">
                 {mentor.avatarUrl && (
