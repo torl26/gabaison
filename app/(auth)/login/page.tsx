@@ -23,7 +23,7 @@ export default function LoginPage() {
           </Link>
           <div className="mt-16 max-w-md lg:mt-24">
             <p className="mb-5 flex items-center gap-3 text-[0.7rem] font-bold uppercase tracking-[0.22em] text-[#c85f41]"><span className="h-px w-8 bg-[#c85f41]" />Welcome back</p>
-            <h1 className="font-sans text-[clamp(2.6rem,5vw,4.7rem)] font-extrabold leading-[1.08] tracking-[-0.07em] text-[#17263d]">また、ここから。<br /><span className="text-[#c85f41]">話す準備を。</span></h1>
+            <h1 className="font-sans text-[clamp(2.35rem,5vw,4.7rem)] font-extrabold leading-[1.08] tracking-[-0.07em] text-[#17263d] [text-wrap:balance]"><span className="block whitespace-nowrap">また、ここから。</span><span className="block whitespace-nowrap text-[#c85f41]">話す準備を。</span></h1>
             <p className="mt-7 max-w-sm text-sm leading-8 text-[#17263d]/60">あなたのペースで大丈夫。<br className="hidden sm:block" />今の気持ちに近い場所から、続きを始めましょう。</p>
           </div>
         </section>
