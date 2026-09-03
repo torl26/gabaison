@@ -53,9 +53,22 @@ describe('20260904090000_0018_badges.sql', () => {
     expect(sql).toContain('on conflict (user_id, badge_definition_id) do nothing');
   });
 
+  it('counts accepted and completed matches cumulatively, not just currently-accepted ones', () => {
+    expect(sql).toContain("where status in ('accepted', 'completed')");
+  });
+
   it('triggers the auto-award only on the transition into accepted', () => {
     expect(sql).toContain('create trigger match_requests_award_badges');
     expect(sql).toContain('after update of status on public.match_requests');
     expect(sql).toContain("when (new.status = 'accepted' and old.status is distinct from 'accepted')");
+  });
+
+  it('revokes public/anon/authenticated execute on the two new security definer functions', () => {
+    expect(sql).toContain('revoke execute on function public.award_match_count_badges(uuid) from public, anon, authenticated');
+    expect(sql).toContain('revoke execute on function public.award_match_count_badges_on_accept() from public, anon, authenticated');
+  });
+
+  it('backfills badges for profiles that already qualify as of this migration', () => {
+    expect(sql).toContain('select public.award_match_count_badges(id) from public.profiles');
   });
 });

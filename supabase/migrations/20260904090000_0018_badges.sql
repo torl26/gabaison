@@ -83,7 +83,7 @@ declare
 begin
   select count(*) into v_count
   from public.match_requests
-  where status = 'accepted'
+  where status in ('accepted', 'completed')
     and (student_id = p_user_id or mentor_id = p_user_id);
 
   insert into public.user_badges (user_id, badge_definition_id)
@@ -116,3 +116,12 @@ create trigger match_requests_award_badges
   for each row
   when (new.status = 'accepted' and old.status is distinct from 'accepted')
   execute function public.award_match_count_badges_on_accept();
+
+-- These exist to be called by the trigger (and a future admin re-sync), not
+-- as public RPCs. Revoking EXECUTE does not affect trigger firing.
+revoke execute on function public.award_match_count_badges(uuid) from public, anon, authenticated;
+revoke execute on function public.award_match_count_badges_on_accept() from public, anon, authenticated;
+
+-- Backfill: award to everyone who already qualifies as of this migration
+-- (rows already accepted/completed before this trigger existed).
+select public.award_match_count_badges(id) from public.profiles;

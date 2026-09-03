@@ -8,6 +8,7 @@ import { STATUS_LABELS } from '@/lib/constants/match-request-status';
 import { fetchUserBadges } from '@/lib/badges/get-user-badges';
 import { fetchManualBadgeDefinitions } from '@/lib/badges/get-badge-definitions';
 import { AwardBadgeForm } from './award-badge-form';
+import { BadgeList } from '@/app/(dashboard)/profile/profile-details';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -72,17 +73,7 @@ export default async function AdminUserDetailPage({
         {userBadges.length === 0 ? (
           <p className="mt-1 text-sm text-muted">なし</p>
         ) : (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {userBadges.map((badge) => (
-              <span
-                key={badge.id}
-                className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-foreground"
-              >
-                <span aria-hidden="true">{badge.icon}</span>
-                {badge.label}
-              </span>
-            ))}
-          </div>
+          <BadgeList badges={userBadges} />
         )}
         <div className="mt-3">
           <AwardBadgeForm userId={detail.id} availableBadges={availableBadges} />
