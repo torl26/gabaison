@@ -7,6 +7,8 @@ import { fetchMentorById } from '../get-mentors';
 import { AcceptingBadge, MentorStatsRow, ProfileDetails } from '../../profile/profile-details';
 import { RatingSummary, ReviewsSection } from '../../profile/reviews-section';
 import { MatchRequestForm } from './match-request-form';
+import { BlockButton } from '../../profile/block-button';
+import { ReportButton } from '../../profile/report-button';
 
 export default async function MentorDetailPage({
   params,
@@ -54,6 +56,12 @@ export default async function MentorDetailPage({
             <RatingSummary stats={reviewStats} />
           </div>
         </div>
+        {user.id !== mentor.id && (
+          <div className="flex flex-wrap items-center gap-2">
+            <ReportButton reportedId={mentor.id} />
+            <BlockButton blockedId={mentor.id} redirectTo="/mentors" />
+          </div>
+        )}
         {mentor.headline && <p className="text-sm font-bold text-foreground">{mentor.headline}</p>}
         <MentorStatsRow stats={stats} />
       </div>

@@ -74,12 +74,17 @@ export default async function ProfilePage() {
 
       <ProfileDetails profile={profile} />
 
-      <Link
-        href="/profile/edit"
-        className="self-start rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground transition hover:opacity-90"
-      >
-        編集する
-      </Link>
+      <div className="flex flex-wrap items-center gap-3">
+        <Link
+          href="/profile/edit"
+          className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground transition hover:opacity-90"
+        >
+          編集する
+        </Link>
+        <Link href="/profile/blocked" className="text-sm text-muted underline">
+          ブロック中のユーザー
+        </Link>
+      </div>
     </div>
   );
 }

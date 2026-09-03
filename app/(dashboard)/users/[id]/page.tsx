@@ -6,6 +6,8 @@ import { ROLE_LABELS } from '@/lib/constants/roles';
 import { fetchReviewsFor } from '@/lib/reviews/get-reviews';
 import { AcceptingBadge, ProfileDetails } from '../../profile/profile-details';
 import { RatingSummary, ReviewsSection } from '../../profile/reviews-section';
+import { BlockButton } from '../../profile/block-button';
+import { ReportButton } from '../../profile/report-button';
 
 export default async function UserProfilePage({
   params,
@@ -51,6 +53,13 @@ export default async function UserProfilePage({
             {profile.role === 'mentor' && <AcceptingBadge accepting={profile.accepting} />}
             <RatingSummary stats={reviewStats} />
           </div>
+          {profile.bio && <p className="mt-2 text-sm text-foreground">{profile.bio}</p>}
+          {user.id !== profile.id && (
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <ReportButton reportedId={profile.id} />
+              <BlockButton blockedId={profile.id} redirectTo="/chat" />
+            </div>
+          )}
           {profile.headline && (
             <p className="mt-1 text-sm text-foreground">{profile.headline}</p>
           )}
