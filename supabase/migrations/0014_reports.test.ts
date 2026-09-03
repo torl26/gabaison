@@ -3,11 +3,11 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(import.meta.dirname, '20260903100300_0016_reports.sql'),
+  path.join(import.meta.dirname, '0014_reports.sql'),
   'utf-8'
 ).toLowerCase();
 
-describe('20260903100300_0016_reports.sql', () => {
+describe('0014_reports.sql', () => {
   it('creates the reports table with a fixed reason enum and a self-report check', () => {
     expect(sql).toContain('create table public.reports');
     expect(sql).toContain(

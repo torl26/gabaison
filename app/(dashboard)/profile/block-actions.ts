@@ -1,10 +1,17 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { type ActionResult, ok, err } from '@/lib/actions/types';
 import { blockUserSchema } from '@/lib/validations/block';
+
+const BLOCK_REDIRECT_TARGETS = ['/mentors', '/chat'] as const;
+
+function resolveRedirectTarget(value: FormDataEntryValue | null): string {
+  return BLOCK_REDIRECT_TARGETS.find((target) => target === value) ?? '/mentors';
+}
 
 export async function blockUserAction(
   _prevState: ActionResult<void> | null,
@@ -42,7 +49,7 @@ export async function blockUserAction(
   revalidatePath('/chat');
   revalidatePath('/requests');
   revalidatePath('/profile/blocked');
-  return ok(undefined);
+  redirect(resolveRedirectTarget(formData.get('redirectTo')));
 }
 
 export async function unblockUserAction(

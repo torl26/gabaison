@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const { getCurrentUserMock, fromMock, insertMock, deleteMock } = vi.hoisted(() => ({
+const { getCurrentUserMock, fromMock, insertMock, deleteMock, redirectMock } = vi.hoisted(() => ({
   getCurrentUserMock: vi.fn(),
   fromMock: vi.fn(),
   insertMock: vi.fn(),
   deleteMock: vi.fn(),
+  redirectMock: vi.fn(),
 }));
 
 vi.mock('@/lib/auth/get-current-user', () => ({
@@ -17,6 +18,10 @@ vi.mock('@/lib/supabase/server', () => ({
 
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
+}));
+
+vi.mock('next/navigation', () => ({
+  redirect: redirectMock,
 }));
 
 import { blockUserAction, unblockUserAction } from './block-actions';
@@ -37,6 +42,7 @@ describe('blockUserAction', () => {
     fromMock.mockReset();
     insertMock.mockReset();
     deleteMock.mockReset();
+    redirectMock.mockReset();
   });
 
   it('returns an error when nobody is logged in, without touching Supabase', async () => {
@@ -48,19 +54,35 @@ describe('blockUserAction', () => {
     expect(fromMock).not.toHaveBeenCalled();
   });
 
-  it('inserts a blocks row with the current user as blocker', async () => {
+  it('inserts a blocks row with the current user as blocker and redirects server-side', async () => {
     getCurrentUserMock.mockResolvedValue({ id: 'user-1' });
     fromMock.mockReturnValue({ insert: insertMock });
     insertMock.mockResolvedValue({ error: null });
 
-    const result = await blockUserAction(null, formDataFor({ blockedId: BLOCKED_ID }));
+    await blockUserAction(
+      null,
+      formDataFor({ blockedId: BLOCKED_ID, redirectTo: '/chat' })
+    );
 
     expect(fromMock).toHaveBeenCalledWith('blocks');
     expect(insertMock).toHaveBeenCalledWith({
       blocker_id: 'user-1',
       blocked_id: BLOCKED_ID,
     });
-    expect(result).toEqual({ success: true, data: undefined });
+    expect(redirectMock).toHaveBeenCalledWith('/chat');
+  });
+
+  it('falls back to /mentors when redirectTo is missing or not on the safelist', async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'user-1' });
+    fromMock.mockReturnValue({ insert: insertMock });
+    insertMock.mockResolvedValue({ error: null });
+
+    await blockUserAction(
+      null,
+      formDataFor({ blockedId: BLOCKED_ID, redirectTo: 'https://evil.example' })
+    );
+
+    expect(redirectMock).toHaveBeenCalledWith('/mentors');
   });
 
   it('returns a friendly message on a duplicate block', async () => {

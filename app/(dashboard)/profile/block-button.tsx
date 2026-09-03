@@ -1,7 +1,6 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useActionState } from 'react';
 import { blockUserAction } from './block-actions';
 
 export function BlockButton({
@@ -12,13 +11,6 @@ export function BlockButton({
   redirectTo: string;
 }) {
   const [state, formAction, pending] = useActionState(blockUserAction, null);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (state?.success) {
-      router.push(redirectTo);
-    }
-  }, [state, redirectTo, router]);
 
   return (
     <div className="flex flex-col gap-1">
@@ -35,6 +27,7 @@ export function BlockButton({
         }}
       >
         <input type="hidden" name="blockedId" value={blockedId} />
+        <input type="hidden" name="redirectTo" value={redirectTo} />
         <button
           type="submit"
           disabled={pending}
