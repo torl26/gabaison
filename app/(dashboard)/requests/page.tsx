@@ -6,8 +6,7 @@ import { fetchMatchRequests } from './get-requests';
 import { RequestActions } from './request-actions';
 import { RequestCancelAction } from './request-cancel-action';
 import { RequestCompleteAction } from './request-complete-action';
-import { ReviewForm } from './review-form';
-import { fetchReviewedMatchIds } from '@/lib/reviews/get-reviews';
+import { ConsultationFeedbackForm } from './consultation-feedback-form';
 import { STATUS_LABELS } from '@/lib/constants/match-request-status';
 import type { MatchRequestStatus } from '@/types/database';
 
@@ -39,10 +38,18 @@ export default async function RequestsPage({
   const statusFilter = isMatchRequestStatus(status) ? status : undefined;
 
   const supabase = await createClient();
-  const [allRequests, reviewedMatchIds] = await Promise.all([
+  const [{ data: feedbackRows }, allRequests] = await Promise.all([
+    supabase
+      .from('consultation_feedback')
+      .select('match_id, author_id')
+      .eq('author_id', user.id),
     fetchMatchRequests(supabase, user.id),
-    fetchReviewedMatchIds(supabase, user.id),
   ]);
+  const submittedFeedback = new Set(
+    ((feedbackRows ?? []) as { match_id: string; author_id: string }[]).map(
+      (row) => `${row.match_id}:${row.author_id}`
+    )
+  );
   const requests = allRequests.filter(
     (request) =>
       request.status !== 'cancelled' && (!statusFilter || request.status === statusFilter)
@@ -128,7 +135,7 @@ export default async function RequestsPage({
                 </div>
               )}
 
-              {request.status === 'accepted' && (
+              {request.status === 'accepted' && request.isMentor && (
                 <div className="mt-3 flex flex-col gap-3">
                   <Link
                     href={`/chat/${request.id}`}
@@ -141,14 +148,12 @@ export default async function RequestsPage({
               )}
 
               {request.status === 'completed' &&
-                !request.isMentor &&
-                !reviewedMatchIds.has(request.id) && (
-                  <div className="mt-3">
-                    <ReviewForm
-                      requestId={request.id}
-                      mentorName={request.counterpartName}
-                    />
-                  </div>
+                !submittedFeedback.has(`${request.id}:${user.id}`) && (
+                  <ConsultationFeedbackForm
+                    requestId={request.id}
+                    role={request.isMentor ? 'mentor' : 'student'}
+                    counterpartName={request.counterpartName}
+                  />
                 )}
             </li>
           ))}
