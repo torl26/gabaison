@@ -11,7 +11,7 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-Supabaseプロジェクトを作成したら、`supabase/migrations/0001_init.sql` を
+Supabaseプロジェクトを作成したら、`supabase/migrations/20260829070142_init.sql` を
 SupabaseのSQL Editor（または `supabase db push`）で適用してください。
 
 ## テスト
@@ -68,7 +68,7 @@ Server Actionsは各画面のファイル内（または同じディレクトリ
 にすぐ引っかかり、検証がしづらいためです。**本番リリース前には必ずONに
 戻してください。**
 
-新規ユーザーの `profiles` 行は `supabase/migrations/0002_profile_auto_create.sql`
+新規ユーザーの `profiles` 行は `supabase/migrations/20260829070929_profile_auto_create.sql`
 のトリガー(`handle_new_user`)が `auth.users` へのINSERT時に自動作成するので、
 Confirm emailのON/OFFに関わらずプロフィール作成自体は失敗しません。
 

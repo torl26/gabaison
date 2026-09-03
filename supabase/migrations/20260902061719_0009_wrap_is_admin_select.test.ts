@@ -3,7 +3,7 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(import.meta.dirname, '0009_wrap_is_admin_select.sql'),
+  path.join(import.meta.dirname, '20260902061719_0009_wrap_is_admin_select.sql'),
   'utf-8'
 ).toLowerCase();
 
@@ -14,7 +14,7 @@ const withoutComments = sql
   .filter((line) => !line.trim().startsWith('--'))
   .join('\n');
 
-describe('0009_wrap_is_admin_select.sql', () => {
+describe('20260902061719_0009_wrap_is_admin_select.sql', () => {
   it('drops and recreates both is_admin()-checking policies', () => {
     for (const policy of REWRITTEN_POLICIES) {
       expect(sql).toContain(`drop policy "${policy}"`);

@@ -3,11 +3,11 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(import.meta.dirname, '0011_message_read_receipts.sql'),
+  path.join(import.meta.dirname, '20260902125901_0011_message_read_receipts.sql'),
   'utf-8'
 ).toLowerCase();
 
-describe('0011_message_read_receipts.sql', () => {
+describe('20260902125901_0011_message_read_receipts.sql', () => {
   it('adds a nullable read_at column to messages', () => {
     expect(sql).toContain('alter table public.messages add column read_at timestamptz');
   });

@@ -3,7 +3,7 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(import.meta.dirname, '0005_rls_performance_and_indexes.sql'),
+  path.join(import.meta.dirname, '20260831023906_0005_rls_performance_and_indexes.sql'),
   'utf-8'
 ).toLowerCase();
 
@@ -19,7 +19,7 @@ const REWRITTEN_POLICIES = [
   'messages_insert_accepted_participant',
 ];
 
-describe('0005_rls_performance_and_indexes.sql', () => {
+describe('20260831023906_0005_rls_performance_and_indexes.sql', () => {
   it('drops and recreates every auth.uid()-checking policy', () => {
     for (const policy of REWRITTEN_POLICIES) {
       expect(sql).toContain(`drop policy "${policy}"`);
