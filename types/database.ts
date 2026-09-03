@@ -32,7 +32,12 @@ export interface MentorCategory {
   category_id: number;
 }
 
-export type MatchRequestStatus = 'pending' | 'accepted' | 'rejected' | 'cancelled';
+export type MatchRequestStatus =
+  | 'pending'
+  | 'accepted'
+  | 'rejected'
+  | 'cancelled'
+  | 'completed';
 
 export interface MatchRequest {
   id: string;
@@ -50,5 +55,15 @@ export interface Message {
   match_id: string;
   sender_id: string;
   content: string;
+  created_at: string;
+}
+
+export interface Review {
+  id: string;
+  match_id: string;
+  reviewer_id: string;
+  reviewee_id: string;
+  rating: number;
+  comment: string;
   created_at: string;
 }

@@ -2,8 +2,10 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
 import { fetchMentorStats } from '@/lib/profile/get-profile-stats';
+import { fetchReviewsFor } from '@/lib/reviews/get-reviews';
 import { fetchMentorById } from '../get-mentors';
 import { AcceptingBadge, MentorStatsRow, ProfileDetails } from '../../profile/profile-details';
+import { RatingSummary, ReviewsSection } from '../../profile/reviews-section';
 import { MatchRequestForm } from './match-request-form';
 
 export default async function MentorDetailPage({
@@ -29,7 +31,10 @@ export default async function MentorDetailPage({
     );
   }
 
-  const stats = await fetchMentorStats(supabase, mentor.id);
+  const [stats, { stats: reviewStats, reviews }] = await Promise.all([
+    fetchMentorStats(supabase, mentor.id),
+    fetchReviewsFor(supabase, mentor.id),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -46,6 +51,7 @@ export default async function MentorDetailPage({
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-bold text-foreground">{mentor.name}</h1>
             <AcceptingBadge accepting={mentor.accepting} />
+            <RatingSummary stats={reviewStats} />
           </div>
         </div>
         {mentor.headline && <p className="text-sm font-bold text-foreground">{mentor.headline}</p>}
@@ -53,6 +59,8 @@ export default async function MentorDetailPage({
       </div>
 
       <ProfileDetails profile={mentor} />
+
+      <ReviewsSection stats={reviewStats} reviews={reviews} />
 
       {mentor.accepting ? (
         <MatchRequestForm mentorId={mentor.id} categories={mentor.categories} />
