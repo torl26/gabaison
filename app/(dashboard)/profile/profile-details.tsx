@@ -76,12 +76,21 @@ export function ProfileDetails({ profile }: { profile: UserProfileView }) {
   ]
     .filter(Boolean)
     .join(' ・ ');
+  const almaMaterLine = [profile.almaMater, profile.almaMaterDepartment]
+    .filter(Boolean)
+    .join(' ・ ');
 
   return (
     <div className="flex flex-col gap-4">
       {affiliationLine && (
         <Field label={isMentor ? '経歴' : '学校'}>
           <p className="text-sm text-foreground">{affiliationLine}</p>
+        </Field>
+      )}
+
+      {isMentor && almaMaterLine && (
+        <Field label="出身校">
+          <p className="text-sm text-foreground">{almaMaterLine}</p>
         </Field>
       )}
 

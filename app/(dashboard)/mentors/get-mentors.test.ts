@@ -24,6 +24,8 @@ function profileRow(overrides: Partial<MentorProfileRow> = {}): MentorProfileRow
     github_url: null,
     x_url: null,
     website_url: null,
+    alma_mater: '',
+    alma_mater_department: '',
     ...overrides,
   };
 }
@@ -45,6 +47,8 @@ function mentorSummary(overrides: Partial<MentorSummary> = {}): MentorSummary {
     skills: [],
     topics: [],
     links: [],
+    almaMater: '',
+    almaMaterDepartment: '',
     ...overrides,
   };
 }

@@ -44,6 +44,11 @@ export const profileSchema = z.object({
   githubUrl: optionalUrl,
   xUrl: optionalUrl,
   websiteUrl: optionalUrl,
+  almaMater: z.string().max(100, '出身校は100文字以内で入力してください').default(''),
+  almaMaterDepartment: z
+    .string()
+    .max(50, '出身学部は50文字以内で入力してください')
+    .default(''),
 });
 
 export type ProfileInput = z.infer<typeof profileSchema>;

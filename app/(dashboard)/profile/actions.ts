@@ -37,6 +37,8 @@ export async function updateProfile(formData: FormData) {
     githubUrl: optionalText(formData.get('githubUrl')),
     xUrl: optionalText(formData.get('xUrl')),
     websiteUrl: optionalText(formData.get('websiteUrl')),
+    almaMater: formData.get('almaMater') ?? '',
+    almaMaterDepartment: formData.get('almaMaterDepartment') ?? '',
   });
 
   if (!parsed.success) {
@@ -59,6 +61,8 @@ export async function updateProfile(formData: FormData) {
     githubUrl,
     xUrl,
     websiteUrl,
+    almaMater,
+    almaMaterDepartment,
   } = parsed.data;
   const supabase = await createClient();
 
@@ -79,6 +83,8 @@ export async function updateProfile(formData: FormData) {
       github_url: githubUrl ?? null,
       x_url: xUrl ?? null,
       website_url: websiteUrl ?? null,
+      alma_mater: almaMater,
+      alma_mater_department: almaMaterDepartment,
     })
     .eq('id', user.id);
 
