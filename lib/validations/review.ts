@@ -6,10 +6,12 @@ export const completeRequestSchema = z.object({
 
 export const reviewSchema = z.object({
   requestId: z.uuid(),
-  rating: z
-    .number()
-    .int('評価を選択してください')
-    .min(1, '評価を選択してください')
-    .max(5, '評価は5段階で入力してください'),
+  rating: z.number().int('評価を選択してください').min(1, '評価を選択してください').max(5, '評価は5段階で入力してください'),
   comment: z.string().max(500, 'コメントは500文字以内で入力してください'),
+});
+
+export const consultationFeedbackSchema = z.object({
+  requestId: z.uuid(),
+  rating: z.number().int('評価を選択してください').min(1, '評価を選択してください').max(5, '評価は5段階で入力してください'),
+  reflection: z.string().trim().min(1, '回答を入力してください').max(500, '回答は500文字以内で入力してください'),
 });
