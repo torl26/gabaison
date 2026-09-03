@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { requireAdmin } from '@/lib/auth/require-admin';
 
+export const dynamic = 'force-dynamic';
+
 const ADMIN_NAV_ITEMS = [
   { href: '/admin', label: '概要' },
   { href: '/admin/users', label: 'ユーザー一覧' },
