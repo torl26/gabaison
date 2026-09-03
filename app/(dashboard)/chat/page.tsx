@@ -21,8 +21,8 @@ export default async function ChatListPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-bold text-foreground">チャット</h1>
+    <div className="flex flex-col gap-8">
+      <h1 className="text-2xl font-extrabold tracking-[-0.05em] text-[#17263d]">チャット</h1>
 
       {chats.length === 0 ? (
         <p className="text-sm text-muted">
@@ -33,7 +33,7 @@ export default async function ChatListPage() {
           {chats.map((chat) => (
             <li
               key={chat.id}
-              className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-sm transition hover:border-primary"
+              className="flex items-center justify-between rounded-[1.4rem] border border-[#17263d]/10 bg-[#fffaf3] p-5 shadow-[0_18px_40px_-30px_rgba(23,38,61,0.5)] transition hover:-translate-y-0.5 hover:border-[#e16f4d]/45"
             >
               <Link href={`/chat/${chat.id}`} className="flex flex-1 items-center gap-3">
                 {chat.counterpartAvatarUrl && (

@@ -26,7 +26,7 @@ export default async function ProfilePage() {
   const stats = profile.role === 'mentor' ? await fetchMentorStats(supabase, user.id) : null;
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-6 p-6">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 p-2 sm:p-6">
       <div className="flex items-start gap-4">
         {profile.avatarUrl && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -38,7 +38,7 @@ export default async function ProfilePage() {
         )}
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl font-bold text-foreground">{profile.name}</h1>
+            <h1 className="text-2xl font-extrabold tracking-[-0.05em] text-[#17263d]">{profile.name}</h1>
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
               {ROLE_LABELS[profile.role]}
             </span>
@@ -50,14 +50,14 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      <section className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-4 shadow-sm">
+      <section className="flex flex-col gap-3 rounded-[1.4rem] border border-[#17263d]/10 bg-[#fffaf3] p-5 shadow-[0_18px_40px_-30px_rgba(23,38,61,0.5)]">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-foreground">プロフィール完成度</h2>
+          <h2 className="text-sm font-extrabold text-[#17263d]">プロフィール完成度</h2>
           <span className="text-sm font-bold text-primary">{completeness.percent}%</span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-border">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary to-amber-400 transition-all"
+            className="h-full rounded-full bg-gradient-to-r from-[#e16f4d] to-[#f5c45b] transition-all"
             style={{ width: `${completeness.percent}%` }}
           />
         </div>
@@ -77,11 +77,11 @@ export default async function ProfilePage() {
       <div className="flex flex-wrap items-center gap-3">
         <Link
           href="/profile/edit"
-          className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground transition hover:opacity-90"
+          className="rounded-full bg-[#e16f4d] px-5 py-3 text-sm font-bold text-[#fff8ed] shadow-[0_14px_26px_-16px_rgba(196,85,54,0.9)] transition hover:-translate-y-0.5 hover:bg-[#cf5f40]"
         >
           編集する
         </Link>
-        <Link href="/profile/blocked" className="text-sm text-muted underline">
+        <Link href="/profile/blocked" className="text-sm font-semibold text-[#c85f41] underline decoration-[#c85f41]/30 underline-offset-4">
           ブロック中のユーザー
         </Link>
       </div>
