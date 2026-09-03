@@ -69,3 +69,24 @@ export interface Review {
   comment: string;
   created_at: string;
 }
+
+export type BadgeSource = 'manual' | 'match_count';
+
+export interface BadgeDefinition {
+  id: string;
+  slug: string;
+  label: string;
+  icon: string;
+  source: BadgeSource;
+  threshold: number | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+export interface UserBadge {
+  id: string;
+  user_id: string;
+  badge_definition_id: string;
+  awarded_by: string | null;
+  awarded_at: string;
+}

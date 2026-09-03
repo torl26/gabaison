@@ -5,6 +5,10 @@ import { fetchUserDetail } from './get-user-detail';
 import { fetchMatchRequests } from '@/app/(dashboard)/requests/get-requests';
 import { ROLE_LABELS } from '@/lib/constants/roles';
 import { STATUS_LABELS } from '@/lib/constants/match-request-status';
+import { fetchUserBadges } from '@/lib/badges/get-user-badges';
+import { fetchManualBadgeDefinitions } from '@/lib/badges/get-badge-definitions';
+import { AwardBadgeForm } from './award-badge-form';
+import { BadgeList } from '@/app/(dashboard)/profile/profile-details';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -43,6 +47,12 @@ export default async function AdminUserDetailPage({
   const asStudent = requests.filter((r) => !r.isMentor);
   const asMentor = requests.filter((r) => r.isMentor);
 
+  const userBadges = await fetchUserBadges(supabase, id);
+  const manualBadges = await fetchManualBadgeDefinitions(supabase);
+  const availableBadges = manualBadges.filter(
+    (badge) => !userBadges.some((userBadge) => userBadge.badgeDefinitionId === badge.id)
+  );
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -56,6 +66,18 @@ export default async function AdminUserDetailPage({
         </p>
         {detail.bio && <p className="mt-2 text-sm text-foreground">{detail.bio}</p>}
         <p className="mt-2 text-sm text-muted">送信メッセージ数: {detail.messageCount}</p>
+      </div>
+
+      <div>
+        <h2 className="font-bold text-foreground">バッジ ({userBadges.length})</h2>
+        {userBadges.length === 0 ? (
+          <p className="mt-1 text-sm text-muted">なし</p>
+        ) : (
+          <BadgeList badges={userBadges} />
+        )}
+        <div className="mt-3">
+          <AwardBadgeForm userId={detail.id} availableBadges={availableBadges} />
+        </div>
       </div>
 
       <div>
