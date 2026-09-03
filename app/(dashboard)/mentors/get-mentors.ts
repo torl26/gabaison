@@ -64,6 +64,18 @@ export async function fetchMentors(
   return excludeMentorsWithoutCategories(summaries);
 }
 
+export async function fetchStudents(
+  supabase: Awaited<ReturnType<typeof createClient>>
+): Promise<MentorSummary[]> {
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select(PROFILE_COLUMNS)
+    .eq('role', 'student')
+    .order('created_at', { ascending: false });
+
+  return buildMentorSummaries((profiles ?? []) as unknown as MentorProfileRow[], []);
+}
+
 export async function fetchMentorById(
   supabase: Awaited<ReturnType<typeof createClient>>,
   mentorId: string

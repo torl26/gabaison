@@ -17,7 +17,12 @@ const NAV_ITEMS = [
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
   const userIsAdmin = user ? await isAdmin(user.id) : false;
-  const unreadChat = user ? await hasUnreadMessages(await createClient(), user.id) : false;
+  const supabase = await createClient();
+  const unreadChat = user ? await hasUnreadMessages(supabase, user.id) : false;
+  const { data: profile } = user
+    ? await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
+    : { data: null };
+  const discoveryLabel = profile?.role === 'mentor' ? '学生を探す' : 'メンターを探す';
 
   return (
     <div className="flex min-h-screen flex-col bg-[#fcf6eb] text-[#17263d]">
@@ -28,7 +33,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <span className="font-serif text-xl font-extrabold tracking-[-0.06em]">TechTies</span>
           </Link>
           <nav className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
-            {NAV_ITEMS.map((item) => <Link key={item.href} href={item.href} className="relative text-xs font-bold text-[#17263d]/65 transition-colors hover:text-[#c85f41] sm:text-sm">{item.label}{item.href === '/chat' && unreadChat && <span aria-label="未読のチャットがあります" className="absolute -right-2 -top-1 size-2 rounded-full bg-[#e16f4d]" />}</Link>)}
+            {NAV_ITEMS.map((item) => <Link key={item.href} href={item.href} className="relative text-xs font-bold text-[#17263d]/65 transition-colors hover:text-[#c85f41] sm:text-sm">{item.href === '/mentors' ? discoveryLabel : item.label}{item.href === '/chat' && unreadChat && <span aria-label="未読のチャットがあります" className="absolute -right-2 -top-1 size-2 rounded-full bg-[#e16f4d]" />}</Link>)}
             {userIsAdmin && <Link href="/admin" className="text-xs font-bold text-[#c85f41] sm:text-sm">管理者画面</Link>}
             <form action={signOutAction}><button type="submit" className="text-xs font-bold text-[#17263d]/45 transition-colors hover:text-[#e16f4d] sm:text-sm">ログアウト</button></form>
           </nav>
