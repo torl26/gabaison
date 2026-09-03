@@ -13,7 +13,7 @@ export function ConsultationFeedbackForm({ requestId, role, counterpartName }: P
   const isStudent = role === 'student';
 
   if (state?.success) {
-    return <p className="rounded-2xl bg-[#d8eadf] px-4 py-3 text-sm font-semibold leading-6 text-[#28543d]">アンケートを送信しました。ご協力ありがとうございます。</p>;
+    return <p className="rounded-2xl bg-[#d8eadf] px-4 py-3 text-sm font-semibold leading-6 text-[#28543d]">送信ありがとうございます。</p>;
   }
 
   return (
