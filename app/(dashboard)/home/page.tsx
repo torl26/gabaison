@@ -90,25 +90,27 @@ export default async function HomePage() {
         <p className="mt-2 text-sm opacity-90">今日もマッチングを進めましょう ✨</p>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-foreground">イベント情報</h2>
-          <span className="rounded-full bg-surface px-2 py-0.5 text-xs text-muted">PR</span>
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-1">
-          {DUMMY_EVENTS.map((event) => (
-            <div
-              key={event.title}
-              className="flex w-64 shrink-0 flex-col gap-2 rounded-xl border border-border bg-surface p-4 shadow-sm"
+      <ul className="grid flex-1 auto-rows-fr gap-4 sm:grid-cols-3">
+        {LINKS.map((link) => (
+          <li key={link.href}>
+            <Link
+              href={link.href}
+              className="flex h-full flex-col items-center justify-center gap-3 rounded-xl border border-border bg-surface p-6 text-center shadow-sm transition hover:-translate-y-1 hover:border-primary hover:shadow-lg"
             >
-              <span className="text-3xl">{event.icon}</span>
-              <span className="text-xs font-bold text-primary">{event.date}</span>
-              <span className="font-bold text-foreground">{event.title}</span>
-              <p className="text-sm text-muted">{event.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+              <div className="flex items-center gap-2">
+                <span className="text-5xl">{link.icon}</span>
+                {link.href === '/requests' && pendingCount > 0 && (
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
+                    審査中 {pendingCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-lg font-bold text-foreground">{link.title}</span>
+              <p className="text-sm text-muted">{link.description}</p>
+            </Link>
+          </li>
+        ))}
+      </ul>
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
@@ -134,27 +136,25 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <ul className="grid flex-1 auto-rows-fr gap-4 sm:grid-cols-3">
-        {LINKS.map((link) => (
-          <li key={link.href}>
-            <Link
-              href={link.href}
-              className="flex h-full flex-col items-center justify-center gap-3 rounded-xl border border-border bg-surface p-6 text-center shadow-sm transition hover:-translate-y-1 hover:border-primary hover:shadow-lg"
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold text-foreground">イベント情報</h2>
+          <span className="rounded-full bg-surface px-2 py-0.5 text-xs text-muted">PR</span>
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-1">
+          {DUMMY_EVENTS.map((event) => (
+            <div
+              key={event.title}
+              className="flex w-64 shrink-0 flex-col gap-2 rounded-xl border border-border bg-surface p-4 shadow-sm"
             >
-              <div className="flex items-center gap-2">
-                <span className="text-5xl">{link.icon}</span>
-                {link.href === '/requests' && pendingCount > 0 && (
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
-                    審査中 {pendingCount}
-                  </span>
-                )}
-              </div>
-              <span className="text-lg font-bold text-foreground">{link.title}</span>
-              <p className="text-sm text-muted">{link.description}</p>
-            </Link>
-          </li>
-        ))}
-      </ul>
+              <span className="text-3xl">{event.icon}</span>
+              <span className="text-xs font-bold text-primary">{event.date}</span>
+              <span className="font-bold text-foreground">{event.title}</span>
+              <p className="text-sm text-muted">{event.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
