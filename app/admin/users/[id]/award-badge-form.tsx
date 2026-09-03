@@ -8,7 +8,7 @@ export function AwardBadgeForm({
   availableBadges,
 }: {
   userId: string;
-  availableBadges: { id: string; label: string; icon: string }[];
+  availableBadges: { id: string; label: string }[];
 }) {
   const [state, formAction, pending] = useActionState(awardBadgeAction, null);
 
@@ -30,7 +30,7 @@ export function AwardBadgeForm({
         </option>
         {availableBadges.map((badge) => (
           <option key={badge.id} value={badge.id}>
-            {badge.icon} {badge.label}
+            {badge.label}
           </option>
         ))}
       </select>

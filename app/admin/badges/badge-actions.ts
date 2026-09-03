@@ -14,7 +14,7 @@ export async function createBadgeDefinitionAction(
 
   const parsed = createBadgeDefinitionSchema.safeParse({
     label: formData.get('label'),
-    icon: formData.get('icon'),
+    imageUrl: formData.get('imageUrl'),
   });
 
   if (!parsed.success) {
@@ -26,7 +26,7 @@ export async function createBadgeDefinitionAction(
   const { error } = await supabase.from('badge_definitions').insert({
     slug: crypto.randomUUID(),
     label: parsed.data.label,
-    icon: parsed.data.icon,
+    image_url: parsed.data.imageUrl,
     source: 'manual',
     created_by: admin.id,
   });

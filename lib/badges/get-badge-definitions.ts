@@ -4,7 +4,8 @@ import type { BadgeSource } from '@/types/database';
 export interface BadgeDefinitionRow {
   id: string;
   label: string;
-  icon: string;
+  icon: string | null;
+  image_url: string | null;
   source: BadgeSource;
 }
 
@@ -13,7 +14,7 @@ export async function fetchManualBadgeDefinitions(
 ): Promise<BadgeDefinitionRow[]> {
   const { data } = await supabase
     .from('badge_definitions')
-    .select('id, label, icon, source')
+    .select('id, label, icon, image_url, source')
     .eq('source', 'manual')
     .order('created_at', { ascending: false });
 

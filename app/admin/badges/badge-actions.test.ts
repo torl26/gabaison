@@ -40,7 +40,19 @@ describe('createBadgeDefinitionAction', () => {
 
     const result = await createBadgeDefinitionAction(
       null,
-      formDataFor({ label: '', icon: '🎉' })
+      formDataFor({ label: '', imageUrl: 'https://example.com/badge.png' })
+    );
+
+    expect(result.success).toBe(false);
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects a missing/invalid image URL before touching Supabase', async () => {
+    requireAdminMock.mockResolvedValue({ id: 'admin-1' });
+
+    const result = await createBadgeDefinitionAction(
+      null,
+      formDataFor({ label: 'ハッカソン参加', imageUrl: '' })
     );
 
     expect(result.success).toBe(false);
@@ -54,14 +66,14 @@ describe('createBadgeDefinitionAction', () => {
 
     const result = await createBadgeDefinitionAction(
       null,
-      formDataFor({ label: 'ハッカソン参加', icon: '💻' })
+      formDataFor({ label: 'ハッカソン参加', imageUrl: 'https://example.com/badge.png' })
     );
 
     expect(fromMock).toHaveBeenCalledWith('badge_definitions');
     expect(insertMock).toHaveBeenCalledWith(
       expect.objectContaining({
         label: 'ハッカソン参加',
-        icon: '💻',
+        image_url: 'https://example.com/badge.png',
         source: 'manual',
         created_by: 'admin-1',
       })
@@ -76,7 +88,7 @@ describe('createBadgeDefinitionAction', () => {
 
     const result = await createBadgeDefinitionAction(
       null,
-      formDataFor({ label: 'ハッカソン参加', icon: '💻' })
+      formDataFor({ label: 'ハッカソン参加', imageUrl: 'https://example.com/badge.png' })
     );
 
     expect(result.success).toBe(false);

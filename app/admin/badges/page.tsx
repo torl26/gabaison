@@ -27,9 +27,18 @@ export default async function AdminBadgesPage() {
               key={badge.id}
               className="flex items-center gap-2 rounded-xl border border-border bg-surface p-4 shadow-sm"
             >
-              <span className="text-xl" aria-hidden="true">
-                {badge.icon}
-              </span>
+              {badge.image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={badge.image_url}
+                  alt=""
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-xl" aria-hidden="true">
+                  {badge.icon}
+                </span>
+              )}
               <span className="font-bold text-foreground">{badge.label}</span>
             </li>
           ))}
