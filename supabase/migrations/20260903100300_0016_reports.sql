@@ -21,4 +21,4 @@ create policy "reports_insert_own" on public.reports
 
 create policy "reports_select_admin" on public.reports
   for select to authenticated
-  using (public.is_admin());
+  using ((select public.is_admin()));

@@ -19,7 +19,7 @@ describe('20260903100300_0016_reports.sql', () => {
   it('enables RLS with insert-own and admin-only select', () => {
     expect(sql).toContain('alter table public.reports enable row level security');
     expect(sql).toContain('with check (reporter_id = (select auth.uid()))');
-    expect(sql).toContain('using (public.is_admin())');
+    expect(sql).toContain('using ((select public.is_admin()))');
   });
 
   it('has no update or delete policy', () => {
