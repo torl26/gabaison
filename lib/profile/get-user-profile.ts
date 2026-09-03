@@ -19,6 +19,8 @@ export interface UserProfileRow {
   github_url: string | null;
   x_url: string | null;
   website_url: string | null;
+  alma_mater: string;
+  alma_mater_department: string;
 }
 
 export interface ProfileLink {
@@ -42,10 +44,12 @@ export interface UserProfileView {
   skills: string[];
   topics: string[];
   links: ProfileLink[];
+  almaMater: string;
+  almaMaterDepartment: string;
 }
 
 export const PROFILE_COLUMNS =
-  'id, name, bio, role, avatar_url, headline, affiliation, title, experience_years, availability, accepting, skills, topics, github_url, x_url, website_url';
+  'id, name, bio, role, avatar_url, headline, affiliation, title, experience_years, availability, accepting, skills, topics, github_url, x_url, website_url, alma_mater, alma_mater_department';
 
 export function buildProfileLinks(profile: {
   github_url: string | null;
@@ -79,6 +83,8 @@ export function buildUserProfileView(
     skills: profile.skills ?? [],
     topics: profile.topics ?? [],
     links: buildProfileLinks(profile),
+    almaMater: profile.alma_mater,
+    almaMaterDepartment: profile.alma_mater_department,
   };
 }
 

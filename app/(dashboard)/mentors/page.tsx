@@ -95,6 +95,11 @@ export default async function MentorsPage({
                   {[mentor.affiliation, mentor.title].filter(Boolean).join(' ・ ')}
                 </p>
               )}
+              {[mentor.almaMater, mentor.almaMaterDepartment].filter(Boolean).length > 0 && (
+                <p className="mt-1 text-xs text-muted">
+                  出身: {[mentor.almaMater, mentor.almaMaterDepartment].filter(Boolean).join(' ・ ')}
+                </p>
+              )}
               <p className="mt-1 text-sm text-muted">{mentor.bio}</p>
 
               {mentor.skills.length > 0 && (

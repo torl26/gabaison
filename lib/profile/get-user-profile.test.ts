@@ -19,6 +19,8 @@ function profileRow(overrides: Partial<UserProfileRow> = {}): UserProfileRow {
     github_url: null,
     x_url: null,
     website_url: null,
+    alma_mater: '',
+    alma_mater_department: '',
     ...overrides,
   };
 }
@@ -78,6 +80,18 @@ describe('buildUserProfileView', () => {
       accepting: false,
       skills: ['React', 'Go'],
       topics: ['ES添削', '技術選定の相談'],
+    });
+  });
+
+  it('exposes the alma mater fields', () => {
+    const result = buildUserProfileView(
+      profileRow({ alma_mater: 'サンプル大学', alma_mater_department: '工学部情報工学科' }),
+      []
+    );
+
+    expect(result).toMatchObject({
+      almaMater: 'サンプル大学',
+      almaMaterDepartment: '工学部情報工学科',
     });
   });
 

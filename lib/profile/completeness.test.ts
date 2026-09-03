@@ -19,6 +19,8 @@ function profileView(overrides: Partial<UserProfileView> = {}): UserProfileView 
     skills: [],
     topics: [],
     links: [],
+    almaMater: '',
+    almaMaterDepartment: '',
     ...overrides,
   };
 }

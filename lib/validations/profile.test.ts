@@ -64,7 +64,44 @@ describe('profileSchema', () => {
       accepting: true,
       skills: [],
       topics: [],
+      almaMater: '',
+      almaMaterDepartment: '',
     });
+  });
+
+  it('accepts an alma mater and department', () => {
+    const result = profileSchema.safeParse({
+      name: '山田太郎',
+      bio: '',
+      almaMater: 'サンプル大学',
+      almaMaterDepartment: '工学部情報工学科',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).toMatchObject({
+      almaMater: 'サンプル大学',
+      almaMaterDepartment: '工学部情報工学科',
+    });
+  });
+
+  it('rejects an alma mater longer than 100 characters', () => {
+    const result = profileSchema.safeParse({
+      name: '山田太郎',
+      bio: '',
+      almaMater: 'あ'.repeat(101),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an alma mater department longer than 50 characters', () => {
+    const result = profileSchema.safeParse({
+      name: '山田太郎',
+      bio: '',
+      almaMaterDepartment: 'あ'.repeat(51),
+    });
+
+    expect(result.success).toBe(false);
   });
 
   it('accepts the richer profile fields', () => {

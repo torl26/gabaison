@@ -175,6 +175,34 @@ export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props
             />
           </label>
         )}
+
+        {isMentor && (
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-muted">出身校</span>
+            <input
+              type="text"
+              name="almaMater"
+              defaultValue={profile.alma_mater}
+              maxLength={100}
+              placeholder="例: サンプル大学"
+              className={INPUT_CLASS}
+            />
+          </label>
+        )}
+
+        {isMentor && (
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-muted">出身学部</span>
+            <input
+              type="text"
+              name="almaMaterDepartment"
+              defaultValue={profile.alma_mater_department}
+              maxLength={50}
+              placeholder="例: 工学部情報工学科"
+              className={INPUT_CLASS}
+            />
+          </label>
+        )}
       </Section>
 
       <Section title="相談できること">
