@@ -5,6 +5,7 @@ export interface MentorProfileRow {
   id: string;
   name: string;
   bio: string;
+  avatar_url: string | null;
 }
 
 export interface MentorCategoryRow {
@@ -16,6 +17,7 @@ export interface MentorSummary {
   id: string;
   name: string;
   bio: string;
+  avatarUrl: string | null;
   categories: CategoryDefinition[];
 }
 
@@ -33,7 +35,10 @@ export function buildMentorSummaries(
 
   return profiles
     .map((profile) => ({
-      ...profile,
+      id: profile.id,
+      name: profile.name,
+      bio: profile.bio,
+      avatarUrl: profile.avatar_url,
       categories: categoriesByMentorId.get(profile.id) ?? [],
     }))
     .filter(
@@ -43,22 +48,28 @@ export function buildMentorSummaries(
     );
 }
 
+export function excludeMentorsWithoutCategories(mentors: MentorSummary[]): MentorSummary[] {
+  return mentors.filter((mentor) => mentor.categories.length > 0);
+}
+
 export async function fetchMentors(
   supabase: Awaited<ReturnType<typeof createClient>>,
   categoryFilter?: CategoryKey
 ): Promise<MentorSummary[]> {
   const [{ data: profiles }, { data: mentorCategories }] = await Promise.all([
-    supabase.from('profiles').select('id, name, bio').eq('role', 'mentor'),
+    supabase.from('profiles').select('id, name, bio, avatar_url').eq('role', 'mentor'),
     supabase
       .from('mentor_categories')
       .select('mentor_id, category:categories(key, label)'),
   ]);
 
-  return buildMentorSummaries(
+  const summaries = buildMentorSummaries(
     profiles ?? [],
     (mentorCategories ?? []) as unknown as MentorCategoryRow[],
     categoryFilter
   );
+
+  return excludeMentorsWithoutCategories(summaries);
 }
 
 export async function fetchMentorById(
@@ -68,7 +79,7 @@ export async function fetchMentorById(
   const [{ data: profile }, { data: mentorCategories }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, name, bio')
+      .select('id, name, bio, avatar_url')
       .eq('role', 'mentor')
       .eq('id', mentorId)
       .maybeSingle(),

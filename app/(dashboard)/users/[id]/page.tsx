@@ -1,26 +1,34 @@
-import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
-import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { redirect } from 'next/navigation';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { createClient } from '@/lib/supabase/server';
 import { fetchUserProfile } from '@/lib/profile/get-user-profile';
 import { ROLE_LABELS } from '@/lib/constants/roles';
 
-export default async function ProfilePage() {
+export default async function UserProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const user = await getCurrentUser();
-
   if (!user) {
     redirect('/login');
   }
 
+  const { id } = await params;
   const supabase = await createClient();
-  const profile = await fetchUserProfile(supabase, user.id);
+  const profile = await fetchUserProfile(supabase, id);
 
   if (!profile) {
-    return <p className="text-muted">プロフィールが見つかりませんでした。</p>;
+    return (
+      <div>
+        <h1 className="text-xl font-bold text-foreground">プロフィール</h1>
+        <p className="mt-2 text-sm text-muted">見つかりません</p>
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-md mx-auto p-6">
+    <div className="flex flex-col gap-4">
       <div className="flex items-start gap-4">
         {profile.avatarUrl && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -53,13 +61,6 @@ export default async function ProfilePage() {
           ))}
         </div>
       )}
-
-      <Link
-        href="/profile/edit"
-        className="self-start rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground transition hover:opacity-90"
-      >
-        編集する
-      </Link>
     </div>
   );
 }

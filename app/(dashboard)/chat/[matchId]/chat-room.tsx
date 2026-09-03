@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { sendMessageAction } from './actions';
+import { markMessagesAsRead, sendMessageAction } from './actions';
 import type { ChatMessage, MessageRow } from './get-chat';
 
 type Props = {
@@ -29,6 +29,7 @@ export function ChatRoom({
       senderName: participantNames[row.sender_id] ?? '不明なユーザー',
       content: row.content,
       createdAt: row.created_at,
+      readAt: row.read_at,
       isOwn: row.sender_id === currentUserId,
     };
   }
@@ -40,7 +41,24 @@ export function ChatRoom({
       }
       return [...current, toChatMessage(row)];
     });
+    if (row.sender_id !== currentUserId) {
+      void markMessagesAsRead(matchId);
+    }
   }
+
+  function updateMessageReadState(row: MessageRow) {
+    setMessages((current) =>
+      current.map((message) =>
+        message.id === row.id ? { ...message, readAt: row.read_at } : message
+      )
+    );
+  }
+
+  // Mark any already-unread messages from the other participant as read as
+  // soon as this chat is opened.
+  useEffect(() => {
+    void markMessagesAsRead(matchId);
+  }, [matchId]);
 
   // Append the sender's own message as soon as the action succeeds, instead
   // of waiting for it to round-trip back through the realtime subscription.
@@ -70,6 +88,18 @@ export function ChatRoom({
           appendMessage(payload.new as MessageRow);
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `match_id=eq.${matchId}`,
+        },
+        (payload) => {
+          updateMessageReadState(payload.new as MessageRow);
+        }
+      )
       .subscribe();
 
     return () => {
@@ -87,14 +117,23 @@ export function ChatRoom({
         {messages.map((message) => (
           <li
             key={message.id}
-            className={`max-w-md rounded-2xl p-3 text-sm ${
-              message.isOwn
-                ? 'ml-auto bg-primary text-primary-foreground'
-                : 'border border-border bg-surface text-foreground'
-            }`}
+            className={`flex items-end gap-1 ${message.isOwn ? 'ml-auto flex-row-reverse' : ''}`}
           >
-            <p className="text-xs opacity-70">{message.senderName}</p>
-            <p>{message.content}</p>
+            <div
+              className={`max-w-md rounded-2xl p-3 text-sm ${
+                message.isOwn
+                  ? 'bg-primary text-primary-foreground'
+                  : 'border border-border bg-surface text-foreground'
+              }`}
+            >
+              <p className="text-xs opacity-70">{message.senderName}</p>
+              <p>{message.content}</p>
+            </div>
+            {message.isOwn && (
+              <span className="shrink-0 text-xs text-muted">
+                {message.readAt ? '既読' : '未読'}
+              </span>
+            )}
           </li>
         ))}
       </ul>

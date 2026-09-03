@@ -7,6 +7,7 @@ export interface MessageRow {
   sender_id: string;
   content: string;
   created_at: string;
+  read_at: string | null;
 }
 
 export interface ChatMessage {
@@ -15,6 +16,7 @@ export interface ChatMessage {
   senderName: string;
   content: string;
   createdAt: string;
+  readAt: string | null;
   isOwn: boolean;
 }
 
@@ -29,6 +31,7 @@ export function buildChatMessages(
     senderName: participantNames[message.sender_id] ?? '不明なユーザー',
     content: message.content,
     createdAt: message.created_at,
+    readAt: message.read_at,
     isOwn: message.sender_id === currentUserId,
   }));
 }
@@ -37,7 +40,9 @@ export interface ChatContext {
   matchId: string;
   status: MatchRequestStatus;
   participantNames: Record<string, string>;
+  counterpartId: string;
   counterpartName: string;
+  counterpartAvatarUrl: string | null;
 }
 
 export async function fetchChatContext(
@@ -60,11 +65,14 @@ export async function fetchChatContext(
 
   const { data: profiles } = await supabase
     .from('profiles')
-    .select('id, name')
+    .select('id, name, avatar_url')
     .in('id', [matchRequest.student_id, matchRequest.mentor_id]);
 
   const participantNames = Object.fromEntries(
     (profiles ?? []).map((profile) => [profile.id, profile.name])
+  );
+  const avatarUrlById = Object.fromEntries(
+    (profiles ?? []).map((profile) => [profile.id, profile.avatar_url as string | null])
   );
 
   const counterpartId =
@@ -74,7 +82,9 @@ export async function fetchChatContext(
     matchId: matchRequest.id,
     status: matchRequest.status,
     participantNames,
+    counterpartId,
     counterpartName: participantNames[counterpartId] ?? '不明なユーザー',
+    counterpartAvatarUrl: avatarUrlById[counterpartId] ?? null,
   };
 }
 
@@ -84,7 +94,7 @@ export async function fetchMessages(
 ): Promise<MessageRow[]> {
   const { data } = await supabase
     .from('messages')
-    .select('id, match_id, sender_id, content, created_at')
+    .select('id, match_id, sender_id, content, created_at, read_at')
     .eq('match_id', matchId)
     .order('created_at', { ascending: true });
 

@@ -25,9 +25,9 @@ const requests = [
 ];
 
 const profiles = [
-  { id: CURRENT_USER_ID, name: '自分' },
-  { id: 'mentor-1', name: 'タロウ' },
-  { id: 'student-2', name: 'ジロウ' },
+  { id: CURRENT_USER_ID, name: '自分', avatar_url: null },
+  { id: 'mentor-1', name: 'タロウ', avatar_url: 'https://example.test/taro.png' },
+  { id: 'student-2', name: 'ジロウ', avatar_url: null },
 ];
 
 const categories = [
@@ -46,6 +46,30 @@ describe('buildMatchRequestSummaries', () => {
 
     expect(result[0].counterpartName).toBe('タロウ');
     expect(result[1].counterpartName).toBe('ジロウ');
+  });
+
+  it('resolves the counterpart id (the other party, not the current user)', () => {
+    const result = buildMatchRequestSummaries(
+      requests,
+      profiles,
+      categories,
+      CURRENT_USER_ID
+    );
+
+    expect(result[0].counterpartId).toBe('mentor-1');
+    expect(result[1].counterpartId).toBe('student-2');
+  });
+
+  it("resolves the counterpart's avatar url, defaulting to null when they have none", () => {
+    const result = buildMatchRequestSummaries(
+      requests,
+      profiles,
+      categories,
+      CURRENT_USER_ID
+    );
+
+    expect(result[0].counterpartAvatarUrl).toBe('https://example.test/taro.png');
+    expect(result[1].counterpartAvatarUrl).toBeNull();
   });
 
   it('marks whether the current user is the mentor on each request', () => {

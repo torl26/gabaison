@@ -65,5 +65,6 @@ export async function updateProfile(formData: FormData) {
   }
 
   revalidatePath('/profile');
+  revalidatePath('/profile/edit');
   return ok(undefined);
 }

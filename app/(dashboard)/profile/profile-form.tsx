@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { updateProfile } from './actions';
 import { createClient } from '@/lib/supabase/client';
 import { validateAvatarFile, buildAvatarStoragePath } from './avatar-upload';
@@ -13,8 +14,8 @@ type Props = {
 };
 
 export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props) {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '');
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -53,13 +54,12 @@ export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props
 
   async function handleSubmit(formData: FormData) {
     setError(null);
-    setSaved(false);
     formData.set('avatarUrl', avatarUrl);
     const result = await updateProfile(formData);
     if (result && !result.success) {
       setError(result.error);
     } else {
-      setSaved(true);
+      router.push('/profile');
     }
   }
 
@@ -125,7 +125,6 @@ export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props
       )}
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      {saved && <p className="text-sm text-green-600">保存しました</p>}
 
       <button
         type="submit"
