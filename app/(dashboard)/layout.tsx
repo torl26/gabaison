@@ -5,6 +5,8 @@ import { isAdmin } from '@/lib/auth/is-admin';
 import { createClient } from '@/lib/supabase/server';
 import { hasUnreadMessages } from './chat/get-unread-counts';
 
+export const dynamic = 'force-dynamic';
+
 const NAV_ITEMS = [
   { href: '/profile', label: 'プロフィール' },
   { href: '/mentors', label: 'メンターを探す' },
