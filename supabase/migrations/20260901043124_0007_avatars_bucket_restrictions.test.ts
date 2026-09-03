@@ -3,11 +3,11 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(import.meta.dirname, '0007_avatars_bucket_restrictions.sql'),
+  path.join(import.meta.dirname, '20260901043124_0007_avatars_bucket_restrictions.sql'),
   'utf-8'
 ).toLowerCase();
 
-describe('0007_avatars_bucket_restrictions.sql', () => {
+describe('20260901043124_0007_avatars_bucket_restrictions.sql', () => {
   it('restricts the avatars bucket to raster image types, excluding svg', () => {
     expect(sql).toContain('allowed_mime_types');
     expect(sql).toContain("'image/png'");

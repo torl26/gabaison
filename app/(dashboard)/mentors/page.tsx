@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
 import { CATEGORIES, CATEGORY_KEYS, type CategoryKey } from '@/lib/constants/categories';
 import { fetchMentors } from './get-mentors';
+import { AcceptingBadge, SkillTags } from '../profile/profile-details';
 
 function isCategoryKey(value: string | undefined): value is CategoryKey {
   return CATEGORY_KEYS.includes(value as CategoryKey);
@@ -75,14 +76,33 @@ export default async function MentorsPage({
                     className="h-10 w-10 rounded-full border border-border object-cover"
                   />
                 )}
-                <Link
-                  href={`/mentors/${mentor.id}`}
-                  className="font-bold text-foreground underline"
-                >
-                  {mentor.name}
-                </Link>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link
+                    href={`/mentors/${mentor.id}`}
+                    className="font-bold text-foreground underline"
+                  >
+                    {mentor.name}
+                  </Link>
+                  <AcceptingBadge accepting={mentor.accepting} />
+                </div>
               </div>
+
+              {mentor.headline && (
+                <p className="mt-2 text-sm font-bold text-foreground">{mentor.headline}</p>
+              )}
+              {[mentor.affiliation, mentor.title].filter(Boolean).length > 0 && (
+                <p className="mt-1 text-xs text-muted">
+                  {[mentor.affiliation, mentor.title].filter(Boolean).join(' ・ ')}
+                </p>
+              )}
               <p className="mt-1 text-sm text-muted">{mentor.bio}</p>
+
+              {mentor.skills.length > 0 && (
+                <div className="mt-2">
+                  <SkillTags skills={mentor.skills} />
+                </div>
+              )}
+
               <div className="mt-2 flex flex-wrap gap-1">
                 {mentor.categories.map((c) => (
                   <span

@@ -1,25 +1,21 @@
 import type { createClient } from '@/lib/supabase/server';
 import type { CategoryDefinition, CategoryKey } from '@/lib/constants/categories';
+import {
+  PROFILE_COLUMNS,
+  buildUserProfileView,
+  type UserProfileRow,
+  type UserProfileView,
+} from '@/lib/profile/get-user-profile';
 
-export interface MentorProfileRow {
-  id: string;
-  name: string;
-  bio: string;
-  avatar_url: string | null;
-}
+export type MentorProfileRow = UserProfileRow;
 
 export interface MentorCategoryRow {
   mentor_id: string;
   category: CategoryDefinition;
 }
 
-export interface MentorSummary {
-  id: string;
-  name: string;
-  bio: string;
-  avatarUrl: string | null;
-  categories: CategoryDefinition[];
-}
+/** A mentor is shown with the same fields as any other profile. */
+export type MentorSummary = UserProfileView;
 
 export function buildMentorSummaries(
   profiles: MentorProfileRow[],
@@ -34,13 +30,9 @@ export function buildMentorSummaries(
   }
 
   return profiles
-    .map((profile) => ({
-      id: profile.id,
-      name: profile.name,
-      bio: profile.bio,
-      avatarUrl: profile.avatar_url,
-      categories: categoriesByMentorId.get(profile.id) ?? [],
-    }))
+    .map((profile) =>
+      buildUserProfileView(profile, categoriesByMentorId.get(profile.id) ?? [])
+    )
     .filter(
       (mentor) =>
         !categoryFilter ||
@@ -57,14 +49,14 @@ export async function fetchMentors(
   categoryFilter?: CategoryKey
 ): Promise<MentorSummary[]> {
   const [{ data: profiles }, { data: mentorCategories }] = await Promise.all([
-    supabase.from('profiles').select('id, name, bio, avatar_url').eq('role', 'mentor'),
+    supabase.from('profiles').select(PROFILE_COLUMNS).eq('role', 'mentor'),
     supabase
       .from('mentor_categories')
       .select('mentor_id, category:categories(key, label)'),
   ]);
 
   const summaries = buildMentorSummaries(
-    profiles ?? [],
+    (profiles ?? []) as unknown as MentorProfileRow[],
     (mentorCategories ?? []) as unknown as MentorCategoryRow[],
     categoryFilter
   );
@@ -79,7 +71,7 @@ export async function fetchMentorById(
   const [{ data: profile }, { data: mentorCategories }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, name, bio, avatar_url')
+      .select(PROFILE_COLUMNS)
       .eq('role', 'mentor')
       .eq('id', mentorId)
       .maybeSingle(),
@@ -94,7 +86,7 @@ export async function fetchMentorById(
   }
 
   return buildMentorSummaries(
-    [profile],
+    [profile as unknown as MentorProfileRow],
     (mentorCategories ?? []) as unknown as MentorCategoryRow[]
   )[0];
 }

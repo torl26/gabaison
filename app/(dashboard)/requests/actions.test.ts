@@ -1,14 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const { getCurrentUserMock, fromMock, updateMock, eqMock, revalidatePathMock } = vi.hoisted(
-  () => ({
-    getCurrentUserMock: vi.fn(),
-    fromMock: vi.fn(),
-    updateMock: vi.fn(),
-    eqMock: vi.fn(),
-    revalidatePathMock: vi.fn(),
-  })
-);
+const {
+  getCurrentUserMock,
+  fromMock,
+  updateMock,
+  eqMock,
+  insertMock,
+  revalidatePathMock,
+} = vi.hoisted(() => ({
+  getCurrentUserMock: vi.fn(),
+  fromMock: vi.fn(),
+  updateMock: vi.fn(),
+  eqMock: vi.fn(),
+  insertMock: vi.fn(),
+  revalidatePathMock: vi.fn(),
+}));
 
 vi.mock('@/lib/auth/get-current-user', () => ({
   getCurrentUser: getCurrentUserMock,
@@ -22,7 +28,12 @@ vi.mock('next/cache', () => ({
   revalidatePath: revalidatePathMock,
 }));
 
-import { cancelMatchRequestAction, respondToMatchRequestAction } from './actions';
+import {
+  cancelMatchRequestAction,
+  completeMatchRequestAction,
+  respondToMatchRequestAction,
+  submitReviewAction,
+} from './actions';
 
 const REQUEST_ID = '11111111-1111-4111-8111-111111111111';
 
@@ -163,6 +174,172 @@ describe('cancelMatchRequestAction', () => {
     const result = await cancelMatchRequestAction(
       null,
       formDataFor({ requestId: REQUEST_ID })
+    );
+
+    expect(result.success).toBe(false);
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('completeMatchRequestAction', () => {
+  afterEach(() => {
+    getCurrentUserMock.mockReset();
+    fromMock.mockReset();
+    updateMock.mockReset();
+    eqMock.mockReset();
+    revalidatePathMock.mockReset();
+  });
+
+  it('returns an error when nobody is logged in, without touching Supabase', async () => {
+    getCurrentUserMock.mockResolvedValue(null);
+
+    const result = await completeMatchRequestAction(
+      null,
+      formDataFor({ requestId: REQUEST_ID })
+    );
+
+    expect(result).toEqual({ success: false, error: 'ログインしてください' });
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects an invalid requestId before touching Supabase', async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+
+    const result = await completeMatchRequestAction(
+      null,
+      formDataFor({ requestId: 'not-a-uuid' })
+    );
+
+    expect(result.success).toBe(false);
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it('marks the request completed and revalidates /requests on success', async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+    eqMock.mockResolvedValue({ error: null });
+    updateMock.mockReturnValue({ eq: eqMock });
+    fromMock.mockReturnValue({ update: updateMock });
+
+    const result = await completeMatchRequestAction(
+      null,
+      formDataFor({ requestId: REQUEST_ID })
+    );
+
+    expect(updateMock).toHaveBeenCalledWith({ status: 'completed' });
+    expect(eqMock).toHaveBeenCalledWith('id', REQUEST_ID);
+    expect(revalidatePathMock).toHaveBeenCalledWith('/requests');
+    expect(result).toEqual({ success: true, data: undefined });
+  });
+
+  it('returns an error when the request was never accepted', async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+    eqMock.mockResolvedValue({
+      error: { message: 'only an accepted request can be completed' },
+    });
+    updateMock.mockReturnValue({ eq: eqMock });
+    fromMock.mockReturnValue({ update: updateMock });
+
+    const result = await completeMatchRequestAction(
+      null,
+      formDataFor({ requestId: REQUEST_ID })
+    );
+
+    expect(result.success).toBe(false);
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('submitReviewAction', () => {
+  afterEach(() => {
+    getCurrentUserMock.mockReset();
+    fromMock.mockReset();
+    insertMock.mockReset();
+    revalidatePathMock.mockReset();
+  });
+
+  function mockRequestLookup(mentorId: string | null) {
+    const maybeSingle = vi.fn().mockResolvedValue({
+      data: mentorId === null ? null : { mentor_id: mentorId },
+    });
+    const select = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({ maybeSingle }),
+    });
+
+    fromMock.mockImplementation((table: string) =>
+      table === 'match_requests' ? { select } : { insert: insertMock }
+    );
+  }
+
+  it('returns an error when nobody is logged in, without touching Supabase', async () => {
+    getCurrentUserMock.mockResolvedValue(null);
+
+    const result = await submitReviewAction(
+      null,
+      formDataFor({ requestId: REQUEST_ID, rating: '5', comment: '' })
+    );
+
+    expect(result).toEqual({ success: false, error: 'ログインしてください' });
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects a rating outside 1-5 before touching Supabase', async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+
+    const result = await submitReviewAction(
+      null,
+      formDataFor({ requestId: REQUEST_ID, rating: '6', comment: '' })
+    );
+
+    expect(result.success).toBe(false);
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it('takes the reviewee from the request rather than the form', async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+    mockRequestLookup('mentor-1');
+    insertMock.mockResolvedValue({ error: null });
+
+    const result = await submitReviewAction(
+      null,
+      formDataFor({
+        requestId: REQUEST_ID,
+        rating: '4',
+        comment: 'ありがとうございました',
+        revieweeId: 'attacker-controlled',
+      })
+    );
+
+    expect(insertMock).toHaveBeenCalledWith({
+      match_id: REQUEST_ID,
+      reviewer_id: 'student-1',
+      reviewee_id: 'mentor-1',
+      rating: 4,
+      comment: 'ありがとうございました',
+    });
+    expect(result).toEqual({ success: true, data: undefined });
+  });
+
+  it('returns an error when the request cannot be read', async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+    mockRequestLookup(null);
+
+    const result = await submitReviewAction(
+      null,
+      formDataFor({ requestId: REQUEST_ID, rating: '5', comment: '' })
+    );
+
+    expect(result).toEqual({ success: false, error: '対象の申請が見つかりません' });
+    expect(insertMock).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when the insert is refused (e.g. not a completed match)', async () => {
+    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+    mockRequestLookup('mentor-1');
+    insertMock.mockResolvedValue({ error: { message: 'new row violates row-level security' } });
+
+    const result = await submitReviewAction(
+      null,
+      formDataFor({ requestId: REQUEST_ID, rating: '5', comment: '' })
     );
 
     expect(result.success).toBe(false);

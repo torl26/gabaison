@@ -22,7 +22,7 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen flex-col">
       <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border bg-surface p-4">
         <Link href="/home" className="font-bold text-primary">
-          学生-メンター マッチング
+          TechTies
         </Link>
         <nav className="flex flex-wrap items-center gap-x-3 gap-y-2">
           {NAV_ITEMS.map((item) => (

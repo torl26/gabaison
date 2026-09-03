@@ -1,14 +1,62 @@
 import { describe, expect, it } from 'vitest';
-import { buildMentorSummaries, excludeMentorsWithoutCategories } from './get-mentors';
+import {
+  buildMentorSummaries,
+  excludeMentorsWithoutCategories,
+  type MentorProfileRow,
+  type MentorSummary,
+} from './get-mentors';
+
+function profileRow(overrides: Partial<MentorProfileRow> = {}): MentorProfileRow {
+  return {
+    id: 'mentor-1',
+    name: 'タロウ',
+    bio: '',
+    role: 'mentor',
+    avatar_url: null,
+    headline: '',
+    affiliation: '',
+    title: '',
+    experience_years: null,
+    availability: '',
+    accepting: true,
+    skills: [],
+    topics: [],
+    github_url: null,
+    x_url: null,
+    website_url: null,
+    ...overrides,
+  };
+}
+
+function mentorSummary(overrides: Partial<MentorSummary> = {}): MentorSummary {
+  return {
+    id: 'mentor-1',
+    name: 'タロウ',
+    bio: '',
+    role: 'mentor',
+    avatarUrl: null,
+    categories: [],
+    headline: '',
+    affiliation: '',
+    title: '',
+    experienceYears: null,
+    availability: '',
+    accepting: true,
+    skills: [],
+    topics: [],
+    links: [],
+    ...overrides,
+  };
+}
 
 const profiles = [
-  {
+  profileRow({
     id: 'mentor-1',
     name: 'タロウ',
     bio: 'キャリア相談が得意です',
     avatar_url: 'https://example.test/taro.png',
-  },
-  { id: 'mentor-2', name: 'ハナコ', bio: '技術メンタリングします', avatar_url: null },
+  }),
+  profileRow({ id: 'mentor-2', name: 'ハナコ', bio: '技術メンタリングします' }),
 ];
 
 const mentorCategories = [
@@ -21,7 +69,7 @@ describe('buildMentorSummaries', () => {
   it('attaches each mentor their own categories', () => {
     const result = buildMentorSummaries(profiles, mentorCategories);
 
-    expect(result).toEqual([
+    expect(result).toMatchObject([
       {
         id: 'mentor-1',
         name: 'タロウ',
@@ -42,15 +90,35 @@ describe('buildMentorSummaries', () => {
     ]);
   });
 
-  it('gives a mentor with no categories an empty list instead of dropping them', () => {
+  it('carries the richer profile fields through to the summary', () => {
     const result = buildMentorSummaries(
-      [{ id: 'mentor-3', name: 'ジロウ', bio: '', avatar_url: null }],
+      [
+        profileRow({
+          headline: '現役エンジニアが相談に乗ります',
+          skills: ['React', 'Go'],
+          topics: ['ES添削'],
+          accepting: false,
+          experience_years: 8,
+          github_url: 'https://github.com/example',
+        }),
+      ],
       []
     );
 
-    expect(result).toEqual([
-      { id: 'mentor-3', name: 'ジロウ', bio: '', avatarUrl: null, categories: [] },
-    ]);
+    expect(result[0]).toMatchObject({
+      headline: '現役エンジニアが相談に乗ります',
+      skills: ['React', 'Go'],
+      topics: ['ES添削'],
+      accepting: false,
+      experienceYears: 8,
+      links: [{ label: 'GitHub', url: 'https://github.com/example' }],
+    });
+  });
+
+  it('gives a mentor with no categories an empty list instead of dropping them', () => {
+    const result = buildMentorSummaries([profileRow({ id: 'mentor-3', name: 'ジロウ' })], []);
+
+    expect(result).toMatchObject([{ id: 'mentor-3', name: 'ジロウ', categories: [] }]);
   });
 
   it('filters out mentors who do not have the requested category', () => {
@@ -69,14 +137,11 @@ describe('buildMentorSummaries', () => {
 describe('excludeMentorsWithoutCategories', () => {
   it('drops a mentor who has not selected any category', () => {
     const result = excludeMentorsWithoutCategories([
-      {
+      mentorSummary({
         id: 'mentor-1',
-        name: 'タロウ',
-        bio: '',
-        avatarUrl: null,
         categories: [{ key: 'career', label: 'キャリア相談' }],
-      },
-      { id: 'mentor-2', name: 'ハナコ', bio: '', avatarUrl: null, categories: [] },
+      }),
+      mentorSummary({ id: 'mentor-2', name: 'ハナコ', categories: [] }),
     ]);
 
     expect(result.map((m) => m.id)).toEqual(['mentor-1']);
@@ -84,13 +149,7 @@ describe('excludeMentorsWithoutCategories', () => {
 
   it('keeps every mentor when all of them have at least one category', () => {
     const mentors = [
-      {
-        id: 'mentor-1',
-        name: 'タロウ',
-        bio: '',
-        avatarUrl: null,
-        categories: [{ key: 'career' as const, label: 'キャリア相談' }],
-      },
+      mentorSummary({ categories: [{ key: 'career', label: 'キャリア相談' }] }),
     ];
 
     expect(excludeMentorsWithoutCategories(mentors)).toEqual(mentors);

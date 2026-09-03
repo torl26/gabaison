@@ -3,11 +3,11 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const sql = readFileSync(
-  path.join(import.meta.dirname, '0008_admin_rls.sql'),
+  path.join(import.meta.dirname, '20260902054813_0008_admin_rls.sql'),
   'utf-8'
 ).toLowerCase();
 
-describe('0008_admin_rls.sql', () => {
+describe('20260902054813_0008_admin_rls.sql', () => {
   it('creates an is_admin() security definer function scoped to the caller', () => {
     expect(sql).toContain('create or replace function public.is_admin()');
     expect(sql).toContain('security definer');

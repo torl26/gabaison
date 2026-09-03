@@ -25,6 +25,23 @@ const DUMMY_EVENTS = [
   },
 ];
 
+const DUMMY_ADS = [
+  {
+    color: 'from-sky-500 to-blue-600',
+    icon: '📈',
+    sponsor: 'CareerNext',
+    headline: '転職のプロがキャリア相談を無料サポート',
+    cta: '詳しく見る',
+  },
+  {
+    color: 'from-emerald-500 to-teal-600',
+    icon: '🗣️',
+    sponsor: 'GlobalTalk',
+    headline: 'オンライン英会話が今なら初月無料',
+    cta: '詳しく見る',
+  },
+];
+
 const LINKS = [
   {
     href: '/mentors',
@@ -88,6 +105,30 @@ export default async function HomePage() {
               <span className="text-xs font-bold text-primary">{event.date}</span>
               <span className="font-bold text-foreground">{event.title}</span>
               <p className="text-sm text-muted">{event.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold text-foreground">広告</h2>
+          <span className="rounded-full bg-surface px-2 py-0.5 text-xs text-muted">PR</span>
+        </div>
+        <div className="flex flex-col gap-3">
+          {DUMMY_ADS.map((ad) => (
+            <div
+              key={ad.sponsor}
+              className={`flex items-center gap-4 rounded-xl bg-gradient-to-r ${ad.color} p-4 text-white shadow-sm`}
+            >
+              <span className="text-3xl">{ad.icon}</span>
+              <div className="flex flex-1 flex-col">
+                <span className="text-xs font-bold opacity-80">{ad.sponsor}</span>
+                <span className="font-bold">{ad.headline}</span>
+              </div>
+              <span className="shrink-0 rounded-full bg-white/20 px-3 py-1 text-xs font-bold">
+                {ad.cta}
+              </span>
             </div>
           ))}
         </div>
