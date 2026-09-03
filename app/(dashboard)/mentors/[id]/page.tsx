@@ -3,6 +3,8 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
 import { fetchMentorById } from '../get-mentors';
 import { MatchRequestForm } from './match-request-form';
+import { BlockButton } from '../../profile/block-button';
+import { ReportButton } from '../../profile/report-button';
 
 export default async function MentorDetailPage({
   params,
@@ -52,6 +54,12 @@ export default async function MentorDetailPage({
             </span>
           ))}
         </div>
+        {user.id !== mentor.id && (
+          <div className="flex flex-wrap items-center gap-2">
+            <ReportButton reportedId={mentor.id} />
+            <BlockButton blockedId={mentor.id} redirectTo="/mentors" />
+          </div>
+        )}
       </div>
 
       <MatchRequestForm mentorId={mentor.id} categories={mentor.categories} />

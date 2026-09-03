@@ -3,6 +3,8 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
 import { fetchUserProfile } from '@/lib/profile/get-user-profile';
 import { ROLE_LABELS } from '@/lib/constants/roles';
+import { BlockButton } from '../../profile/block-button';
+import { ReportButton } from '../../profile/report-button';
 
 export default async function UserProfilePage({
   params,
@@ -46,6 +48,12 @@ export default async function UserProfilePage({
             </span>
           </div>
           {profile.bio && <p className="mt-2 text-sm text-foreground">{profile.bio}</p>}
+          {user.id !== profile.id && (
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <ReportButton reportedId={profile.id} />
+              <BlockButton blockedId={profile.id} redirectTo="/chat" />
+            </div>
+          )}
         </div>
       </div>
 
