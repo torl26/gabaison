@@ -9,39 +9,41 @@ export function LoginForm({ skipAuthEnabled }: { skipAuthEnabled: boolean }) {
 
   return (
     <>
-      <form action={formAction} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1 text-sm text-muted">
+      <form action={formAction} className="flex flex-col gap-5">
+        <label className="flex flex-col gap-2 text-sm font-semibold text-[#17263d]/70">
           メールアドレス
           <input
             type="email"
             name="email"
             required
-            className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            autoComplete="email"
+            className="rounded-2xl border border-[#17263d]/12 bg-white/70 px-4 py-3.5 text-[#17263d] outline-none transition placeholder:text-[#17263d]/30 focus:border-[#e16f4d]/60 focus:bg-white focus:ring-4 focus:ring-[#e16f4d]/10"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-muted">
+        <label className="flex flex-col gap-2 text-sm font-semibold text-[#17263d]/70">
           パスワード
           <input
             type="password"
             name="password"
             required
-            className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            autoComplete="current-password"
+            className="rounded-2xl border border-[#17263d]/12 bg-white/70 px-4 py-3.5 text-[#17263d] outline-none transition placeholder:text-[#17263d]/30 focus:border-[#e16f4d]/60 focus:bg-white focus:ring-4 focus:ring-[#e16f4d]/10"
           />
         </label>
         {state && !state.success && (
-          <p className="text-sm text-red-600">{state.error}</p>
+          <p role="alert" className="rounded-xl bg-[#e16f4d]/10 px-4 py-3 text-sm font-semibold leading-6 text-[#a84c33]">{state.error}</p>
         )}
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-primary px-4 py-2 text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+          className="mt-1 inline-flex items-center justify-center rounded-full bg-[#e16f4d] px-5 py-3.5 text-sm font-bold text-[#fff8ed] shadow-[0_16px_30px_-16px_rgba(196,85,54,0.95)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#cf5f40] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {pending ? 'ログイン中...' : 'ログイン'}
+          {pending ? 'ログイン中...' : 'ログインする'}
         </button>
       </form>
       {skipAuthEnabled && (
-        <Link href="/home" className="text-center text-sm text-primary underline">
-          ログインをスキップ(開発用)
+        <Link href="/home" className="mt-5 block text-center text-sm font-semibold text-[#c85f41] underline decoration-[#c85f41]/30 underline-offset-4">
+          ログインをスキップ（開発用）
         </Link>
       )}
     </>
