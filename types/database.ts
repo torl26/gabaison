@@ -6,6 +6,17 @@ export interface Profile {
   name: string;
   bio: string;
   avatar_url: string | null;
+  headline: string;
+  affiliation: string;
+  title: string;
+  experience_years: number | null;
+  availability: string;
+  accepting: boolean;
+  skills: string[];
+  topics: string[];
+  github_url: string | null;
+  x_url: string | null;
+  website_url: string | null;
   created_at: string;
   updated_at: string;
 }
