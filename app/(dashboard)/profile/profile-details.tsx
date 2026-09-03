@@ -38,20 +38,26 @@ export function BadgeList({ badges }: { badges: UserBadgeView[] }) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-3">
       {badges.map((badge) => (
-        <span
-          key={badge.id}
-          className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-foreground"
-        >
+        <div key={badge.id} className="flex w-[2cm] flex-col items-center gap-1 text-center">
           {badge.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={badge.imageUrl} alt="" className="h-4 w-4 rounded-full object-cover" />
+            <img
+              src={badge.imageUrl}
+              alt=""
+              className="h-[2cm] w-[2cm] rounded-full border border-border object-cover"
+            />
           ) : (
-            <span aria-hidden="true">{badge.icon}</span>
+            <span
+              aria-hidden="true"
+              className="flex h-[2cm] w-[2cm] items-center justify-center rounded-full border border-border bg-surface text-3xl"
+            >
+              {badge.icon}
+            </span>
           )}
-          {badge.label}
-        </span>
+          <span className="text-xs text-foreground">{badge.label}</span>
+        </div>
       ))}
     </div>
   );
