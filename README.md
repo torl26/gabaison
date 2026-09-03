@@ -13,7 +13,8 @@
 - プロフィール編集、アバター画像、プロフィール完成度の表示
 - 完了したマッチングへのレビュー
 - ユーザーのブロック・通報機能
-- 管理者向けの利用状況集計・通報確認画面
+- イベント参加・マッチング回数達成に応じたバッジ表示（マッチング回数バッジは自動付与）
+- 管理者向けの利用状況集計・通報確認・バッジ作成/付与画面
 
 ## 画面一覧
 
@@ -34,7 +35,8 @@
 | ユーザー詳細 | `/users/[id]` | 他ユーザーの公開プロフィール |
 | 管理者画面 | `/admin` | 利用状況の集計 |
 | 通報管理 | `/admin/reports` | 通報内容の確認 |
-| ユーザー管理 | `/admin/users` | ユーザー情報の確認 |
+| ユーザー管理 | `/admin/users` | ユーザー情報の確認、バッジの付与 |
+| バッジ管理 | `/admin/badges` | バッジの作成（画像アップロード） |
 
 ## 技術スタック
 
@@ -82,7 +84,11 @@ supabase link --project-ref <project-ref>
 supabase db push
 ```
 
-Supabase CLIを使わない場合は、`supabase/migrations/` 内のSQLをファイル名の時系列順にSupabase SQL Editorで実行してください。マイグレーションには、プロフィール自動作成、RLS、アバター画像、Realtime、レビュー、ブロック、通報、管理者権限などの設定が含まれています。
+Supabase CLIを使わない場合は、`supabase/migrations/` 内のSQLをファイル名の時系列順にSupabase SQL Editorで実行してください。マイグレーションには、プロフィール自動作成、RLS、アバター画像、Realtime、レビュー、ブロック、通報、管理者権限、バッジ（テーブル・Storage・自動付与トリガー）などの設定が含まれています。
+
+**注意:** `main`へのマージ・pushはVercelのビルド/デプロイを起動しますが、Supabaseのマイグレーションは自動では適用されません。新しいマイグレーションを追加したら、`main`にマージした後で必ず本番プロジェクトに対して`supabase db push`（または対応するSQLをSQL Editorで実行）してください。適用を忘れると、アプリのコードは新しいテーブル/Storageバケットを前提に動くのに実体が存在せず、機能がエラーになります。
+
+適用状況は `supabase migration list`（要`supabase link`）で確認できます。Supabase Dashboard経由で直接SQLを実行した場合など、CLIの履歴テーブルとファイル名のタイムスタンプがずれることがあります。その場合は`supabase migration repair --status applied|reverted <timestamp>`で履歴を実体に合わせてから`supabase db push`を実行してください（履歴の付け替えのみで、SQLは再実行されません）。
 
 ### 開発サーバー
 
@@ -148,6 +154,7 @@ app/
   globals.css          # 共通デザイントークン
 lib/
   auth/                # 現在ユーザー・権限取得
+  badges/              # バッジ取得・画像アップロード処理
   constants/           # カテゴリ、ロール、ステータスなどの定数
   profile/             # プロフィール取得・完成度・統計
   reviews/             # レビュー関連処理
@@ -186,6 +193,8 @@ npm run build
 ```
 
 GitHubのPull Requestを作成すると、Vercel Previewで本番反映前の画面とビルド結果を確認できます。
+
+**Vercelのデプロイはアプリのビルドのみで、Supabaseのマイグレーションは含まれません。** 新しいマイグレーションを含むマージをデプロイする際は、上記「データベースの準備」の通り`supabase db push`を別途実行してください。
 
 ## 設計資料
 
