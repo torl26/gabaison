@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/auth/require-admin';
 const ADMIN_NAV_ITEMS = [
   { href: '/admin', label: '概要' },
   { href: '/admin/users', label: 'ユーザー一覧' },
+  { href: '/admin/reports', label: '通報一覧' },
 ];
 
 export default async function AdminLayout({
