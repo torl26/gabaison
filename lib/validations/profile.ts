@@ -37,9 +37,12 @@ export const profileSchema = z.object({
     .array(z.string().max(MAX_SKILL_LENGTH))
     .max(MAX_SKILLS, `スキルタグは${MAX_SKILLS}個以内で入力してください`)
     .default([]),
+  // Mentors submit up to MAX_TOPICS free-form lines; students submit up to
+  // MAX_SKILLS technology tags. This bound is the wider of the two — the
+  // per-role item cap is already enforced during parsing (parse-list-input).
   topics: z
     .array(z.string().max(MAX_TOPIC_LENGTH))
-    .max(MAX_TOPICS, `相談できることは${MAX_TOPICS}件以内で入力してください`)
+    .max(Math.max(MAX_TOPICS, MAX_SKILLS), '入力できる項目数の上限を超えています')
     .default([]),
   githubUrl: optionalUrl,
   xUrl: optionalUrl,

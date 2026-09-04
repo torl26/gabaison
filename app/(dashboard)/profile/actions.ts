@@ -19,6 +19,16 @@ export async function updateProfile(formData: FormData) {
     return err('ログインしてください');
   }
 
+  const supabase = await createClient();
+
+  const { data: currentProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  const isMentor = currentProfile?.role === 'mentor';
+
   const experienceYearsRaw = optionalText(formData.get('experienceYears'));
 
   const parsed = profileSchema.safeParse({
@@ -33,7 +43,11 @@ export async function updateProfile(formData: FormData) {
     availability: formData.get('availability') ?? '',
     accepting: formData.get('accepting') === 'on',
     skills: parseSkillsInput(String(formData.get('skills') ?? '')),
-    topics: parseTopicsInput(String(formData.get('topics') ?? '')),
+    // Mentors write free-form consultation topics (one per line); students
+    // write a comma-separated technology tag list, same shape as skills.
+    topics: isMentor
+      ? parseTopicsInput(String(formData.get('topics') ?? ''))
+      : parseSkillsInput(String(formData.get('topics') ?? '')),
     githubUrl: optionalText(formData.get('githubUrl')),
     xUrl: optionalText(formData.get('xUrl')),
     websiteUrl: optionalText(formData.get('websiteUrl')),
@@ -64,7 +78,6 @@ export async function updateProfile(formData: FormData) {
     almaMater,
     almaMaterDepartment,
   } = parsed.data;
-  const supabase = await createClient();
 
   const { error: updateError } = await supabase
     .from('profiles')
@@ -92,13 +105,7 @@ export async function updateProfile(formData: FormData) {
     return err('保存に失敗しました: ' + updateError.message);
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (profile?.role === 'mentor') {
+  if (isMentor) {
     await supabase.from('mentor_categories').delete().eq('mentor_id', user.id);
 
     if (categoryKeys && categoryKeys.length > 0) {

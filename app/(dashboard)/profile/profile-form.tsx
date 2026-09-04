@@ -205,7 +205,7 @@ export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props
         )}
       </Section>
 
-      <Section title="相談できること">
+      <Section title={isMentor ? '相談できること' : 'スキル・技術'}>
         <label className="flex flex-col gap-1">
           <span className="text-sm text-muted">スキルタグ</span>
           <input
@@ -220,17 +220,33 @@ export function ProfileForm({ profile, categories, selectedCategoryKeys }: Props
           </span>
         </label>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-muted">相談できること</span>
-          <textarea
-            name="topics"
-            defaultValue={formatTopicsInput(profile.topics ?? [])}
-            rows={4}
-            placeholder={'例:\nES添削\nポートフォリオレビュー\n技術選定の相談'}
-            className={INPUT_CLASS}
-          />
-          <span className="text-xs text-muted">1行に1件、{MAX_TOPICS}件まで入力できます</span>
-        </label>
+        {isMentor ? (
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-muted">相談できること</span>
+            <textarea
+              name="topics"
+              defaultValue={formatTopicsInput(profile.topics ?? [])}
+              rows={4}
+              placeholder={'例:\nES添削\nポートフォリオレビュー\n技術選定の相談'}
+              className={INPUT_CLASS}
+            />
+            <span className="text-xs text-muted">1行に1件、{MAX_TOPICS}件まで入力できます</span>
+          </label>
+        ) : (
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-muted">使用できる技術</span>
+            <input
+              type="text"
+              name="topics"
+              defaultValue={formatSkillsInput(profile.topics ?? [])}
+              placeholder="例: React, TypeScript, 機械学習"
+              className={INPUT_CLASS}
+            />
+            <span className="text-xs text-muted">
+              カンマ区切りで{MAX_SKILLS}個まで入力できます
+            </span>
+          </label>
+        )}
 
         {isMentor && (
           <fieldset className="flex flex-col gap-2">

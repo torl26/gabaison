@@ -133,17 +133,21 @@ export function ProfileDetails({ profile }: { profile: UserProfileView }) {
       )}
 
       {profile.topics.length > 0 && (
-        <Field label="相談できること">
-          <ul className="flex flex-col gap-1">
-            {profile.topics.map((topic) => (
-              <li key={topic} className="flex gap-2 text-sm text-foreground">
-                <span aria-hidden="true" className="text-primary">
-                  ・
-                </span>
-                {topic}
-              </li>
-            ))}
-          </ul>
+        <Field label={isMentor ? '相談できること' : '使用できる技術'}>
+          {isMentor ? (
+            <ul className="flex flex-col gap-1">
+              {profile.topics.map((topic) => (
+                <li key={topic} className="flex gap-2 text-sm text-foreground">
+                  <span aria-hidden="true" className="text-primary">
+                    ・
+                  </span>
+                  {topic}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <SkillTags skills={profile.topics} />
+          )}
         </Field>
       )}
 
