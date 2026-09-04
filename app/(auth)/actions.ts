@@ -35,7 +35,7 @@ export async function signupAction(
     return err(error?.message ?? 'サインアップに失敗しました');
   }
 
-  redirect('/home');
+  redirect('/profile/edit');
 }
 
 export async function loginAction(
