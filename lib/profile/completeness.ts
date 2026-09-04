@@ -33,7 +33,11 @@ export function calculateCompleteness(profile: UserProfileView): ProfileComplete
       done: profile.title.trim() !== '',
     },
     { key: 'skills', label: 'スキルタグ', done: profile.skills.length > 0 },
-    { key: 'topics', label: '相談できること', done: profile.topics.length > 0 },
+    {
+      key: 'topics',
+      label: profile.role === 'mentor' ? '相談できること' : '使用できる技術',
+      done: profile.topics.length > 0,
+    },
     { key: 'availability', label: '対応可能な時間帯', done: profile.availability.trim() !== '' },
     { key: 'links', label: 'リンク', done: profile.links.length > 0 },
   ];

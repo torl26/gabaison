@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
 import { fetchMatchRequests } from '../requests/get-requests';
+import { fetchUserProfile } from '@/lib/profile/get-user-profile';
+import { calculateCompleteness } from '@/lib/profile/completeness';
 
 const DUMMY_EVENTS = [
   { icon: '🎤', date: '9/20(土) 19:00〜', title: 'オンライン交流会', description: '先輩メンターと気軽に話せるオンラインイベントです。' },
@@ -26,10 +28,13 @@ export default async function HomePage() {
   if (!user) redirect('/login');
 
   const supabase = await createClient();
-  const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).maybeSingle();
-  const requests = await fetchMatchRequests(supabase, user.id);
+  const [profile, requests] = await Promise.all([
+    fetchUserProfile(supabase, user.id),
+    fetchMatchRequests(supabase, user.id),
+  ]);
   const pendingCount = requests.filter((r) => r.status === 'pending').length;
   const displayName = profile?.name ?? 'あなた';
+  const completenessPercent = profile ? calculateCompleteness(profile).percent : null;
 
   return (
     <div className="relative flex flex-1 flex-col gap-10 overflow-hidden bg-[#fcf6eb] text-[#17263d] -m-4 p-4 sm:-m-8 sm:p-8">
@@ -49,7 +54,7 @@ export default async function HomePage() {
       <section className="relative mx-auto w-full max-w-6xl">
         <div className="mb-5 flex items-end justify-between"><div><p className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-[#c85f41]">Choose your step</p><h2 className="text-2xl font-extrabold tracking-[-0.05em] sm:text-3xl">今、できること。</h2></div><span className="hidden text-xs font-semibold text-[#17263d]/40 sm:block">自分のペースで選べます</span></div>
         <ul className="grid gap-4 md:grid-cols-3">
-          {LINKS.map((link) => <li key={link.href}><Link href={link.href} className="group flex min-h-[190px] flex-col justify-between rounded-[1.6rem] border border-[#17263d]/10 bg-[#fffaf3]/90 p-6 shadow-[0_18px_40px_-30px_rgba(23,38,61,0.5)] transition-all duration-200 hover:-translate-y-1 hover:border-[#e16f4d]/45 hover:shadow-[0_24px_45px_-28px_rgba(23,38,61,0.45)]"><div className="flex items-start justify-between"><span className="flex size-11 items-center justify-center rounded-2xl bg-[#f5c45b]/35 text-2xl font-light text-[#c85f41]">{link.icon}</span>{link.href === '/requests' && pendingCount > 0 && <span className="rounded-full bg-[#f5c45b]/30 px-2.5 py-1 text-[0.68rem] font-bold text-[#9b6f16]">審査中 {pendingCount}</span>}</div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#c85f41]">{link.eyebrow}</p><h3 className="mt-2 text-lg font-extrabold tracking-[-0.03em]">{link.title}</h3><p className="mt-2 text-sm leading-6 text-[#17263d]/55">{link.description}</p></div></Link></li>)}
+          {LINKS.map((link) => <li key={link.href}><Link href={link.href} className="group flex min-h-[190px] flex-col justify-between rounded-[1.6rem] border border-[#17263d]/10 bg-[#fffaf3]/90 p-6 shadow-[0_18px_40px_-30px_rgba(23,38,61,0.5)] transition-all duration-200 hover:-translate-y-1 hover:border-[#e16f4d]/45 hover:shadow-[0_24px_45px_-28px_rgba(23,38,61,0.45)]"><div className="flex items-start justify-between"><span className="flex size-11 items-center justify-center rounded-2xl bg-[#f5c45b]/35 text-2xl font-light text-[#c85f41]">{link.icon}</span>{link.href === '/requests' && pendingCount > 0 && <span className="rounded-full bg-[#f5c45b]/30 px-2.5 py-1 text-[0.68rem] font-bold text-[#9b6f16]">審査中 {pendingCount}</span>}{link.href === '/profile' && completenessPercent !== null && completenessPercent < 100 && <span className="rounded-full bg-[#f5c45b]/30 px-2.5 py-1 text-[0.68rem] font-bold text-[#9b6f16]">完成度 {completenessPercent}%</span>}</div><div><p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#c85f41]">{link.eyebrow}</p><h3 className="mt-2 text-lg font-extrabold tracking-[-0.03em]">{link.title}</h3><p className="mt-2 text-sm leading-6 text-[#17263d]/55">{link.description}</p>{link.href === '/profile' && completenessPercent !== null && <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#17263d]/10"><div className="h-full rounded-full bg-gradient-to-r from-[#e16f4d] to-[#f5c45b]" style={{ width: `${completenessPercent}%` }} /></div>}</div></Link></li>)}
         </ul>
       </section>
 
