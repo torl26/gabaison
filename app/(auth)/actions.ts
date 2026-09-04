@@ -35,6 +35,13 @@ export async function signupAction(
     return err(error?.message ?? 'サインアップに失敗しました');
   }
 
+  // If email confirmation is required (Supabase Dashboard → Authentication
+  // → Confirm email), signUp() creates the user but returns no session —
+  // there's nothing to redirect the user into yet.
+  if (!data.session) {
+    redirect('/signup/check-email');
+  }
+
   redirect('/profile/edit');
 }
 

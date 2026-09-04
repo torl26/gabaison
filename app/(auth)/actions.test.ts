@@ -36,7 +36,7 @@ describe('signupAction', () => {
 
   it('passes role and name as signup metadata instead of inserting into profiles directly', async () => {
     signUpMock.mockResolvedValue({
-      data: { user: { id: 'user-1' } },
+      data: { user: { id: 'user-1' }, session: { access_token: 'token' } },
       error: null,
     });
 
@@ -57,5 +57,23 @@ describe('signupAction', () => {
       options: { data: { role: 'student', name: 'student' } },
     });
     expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it('sends an unconfirmed signup (no session yet) to the check-email page instead', async () => {
+    signUpMock.mockResolvedValue({
+      data: { user: { id: 'user-1' }, session: null },
+      error: null,
+    });
+
+    await expect(
+      signupAction(
+        null,
+        formDataFor({
+          email: 'student@example.com',
+          password: 'password123',
+          role: 'student',
+        })
+      )
+    ).rejects.toThrow('REDIRECT:/signup/check-email');
   });
 });
