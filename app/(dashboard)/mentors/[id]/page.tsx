@@ -4,7 +4,13 @@ import { createClient } from '@/lib/supabase/server';
 import { fetchMentorStats } from '@/lib/profile/get-profile-stats';
 import { fetchReviewsFor } from '@/lib/reviews/get-reviews';
 import { fetchMentorById } from '../get-mentors';
-import { AcceptingBadge, MentorStatsRow, ProfileDetails } from '../../profile/profile-details';
+import { fetchUserBadges } from '@/lib/badges/get-user-badges';
+import {
+  AcceptingBadge,
+  BadgeList,
+  MentorStatsRow,
+  ProfileDetails,
+} from '../../profile/profile-details';
 import { RatingSummary, ReviewsSection } from '../../profile/reviews-section';
 import { MatchRequestForm } from './match-request-form';
 import { BlockButton } from '../../profile/block-button';
@@ -33,9 +39,10 @@ export default async function MentorDetailPage({
     );
   }
 
-  const [stats, { stats: reviewStats, reviews }] = await Promise.all([
+  const [stats, { stats: reviewStats, reviews }, badges] = await Promise.all([
     fetchMentorStats(supabase, mentor.id),
     fetchReviewsFor(supabase, mentor.id),
+    fetchUserBadges(supabase, mentor.id),
   ]);
 
   return (
@@ -65,6 +72,8 @@ export default async function MentorDetailPage({
         {mentor.headline && <p className="text-sm font-bold text-foreground">{mentor.headline}</p>}
         <MentorStatsRow stats={stats} />
       </div>
+
+      <BadgeList badges={badges} />
 
       <ProfileDetails profile={mentor} />
 

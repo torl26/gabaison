@@ -51,8 +51,11 @@ create table public.user_badges (
 
 alter table public.user_badges enable row level security;
 
--- Shown on public profiles (own and others'), same reasoning as
--- profiles_select_authenticated (migration 0001).
+-- Shown on public profiles (own and others'). Deliberately open to every
+-- authenticated user, unlike profiles_select_authenticated (which migration
+-- 0015 restricted to hide blocked users): a badge row carries no PII and
+-- reveals nothing beyond "this user id has this badge", so there is no
+-- reason to also hide it across a block relationship.
 create policy "user_badges_select_authenticated" on public.user_badges
   for select to authenticated using (true);
 
