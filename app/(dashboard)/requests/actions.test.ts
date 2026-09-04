@@ -214,11 +214,19 @@ describe('completeMatchRequestAction', () => {
     expect(fromMock).not.toHaveBeenCalled();
   });
 
+  function mockCompletionLookup(request: { mentor_id: string; status: string } | null) {
+    const maybeSingle = vi.fn().mockResolvedValue({ data: request });
+    const select = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({ maybeSingle }),
+    });
+    fromMock.mockReturnValue({ select, update: updateMock });
+  }
+
   it('marks the request completed and revalidates /requests on success', async () => {
-    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
+    getCurrentUserMock.mockResolvedValue({ id: 'mentor-1' });
+    mockCompletionLookup({ mentor_id: 'mentor-1', status: 'accepted' });
     eqMock.mockResolvedValue({ error: null });
     updateMock.mockReturnValue({ eq: eqMock });
-    fromMock.mockReturnValue({ update: updateMock });
 
     const result = await completeMatchRequestAction(
       null,
@@ -232,12 +240,8 @@ describe('completeMatchRequestAction', () => {
   });
 
   it('returns an error when the request was never accepted', async () => {
-    getCurrentUserMock.mockResolvedValue({ id: 'student-1' });
-    eqMock.mockResolvedValue({
-      error: { message: 'only an accepted request can be completed' },
-    });
-    updateMock.mockReturnValue({ eq: eqMock });
-    fromMock.mockReturnValue({ update: updateMock });
+    getCurrentUserMock.mockResolvedValue({ id: 'mentor-1' });
+    mockCompletionLookup({ mentor_id: 'mentor-1', status: 'pending' });
 
     const result = await completeMatchRequestAction(
       null,
@@ -245,6 +249,7 @@ describe('completeMatchRequestAction', () => {
     );
 
     expect(result.success).toBe(false);
+    expect(updateMock).not.toHaveBeenCalled();
     expect(revalidatePathMock).not.toHaveBeenCalled();
   });
 });
